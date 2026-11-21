@@ -10,6 +10,7 @@ import app.fasorhub.util.Jdbc;
 import app.fasorhub.util.Messages;
 import app.fasorhub.util.Tx;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -28,7 +29,7 @@ class ExpireOverdueTest {
 
     @AfterEach
     void resetClock() {
-        Clock.fixToday(null);
+        Clock.reset();
     }
 
     private long booking(String email, String purpose) {
@@ -130,15 +131,15 @@ class ExpireOverdueTest {
     }
 
     @Test
-    void kon07BookingIsOverdueOnlyAfterMidnightOfItsDate() {
+    void kon07BookingIsOverdueOnlyAfterMidnightInJakarta() {
         long id = booking("alice@example.com", "Futsal practice");
         LocalDate bookingDate = Clock.today().plusDays(4);
 
-        Clock.fixToday(bookingDate);
+        Clock.fixAt(bookingDate.atTime(16, 59).toInstant(ZoneOffset.UTC));
         BookingService.expireAllOverdue();
         assertEquals(BookingStatus.PENDING_VERIFICATION.code(), field(id, "status"));
 
-        Clock.fixToday(bookingDate.plusDays(1));
+        Clock.fixAt(bookingDate.atTime(17, 5).toInstant(ZoneOffset.UTC));
         BookingService.expireAllOverdue();
         assertEquals(BookingStatus.REJECTED.code(), field(id, "status"));
     }
