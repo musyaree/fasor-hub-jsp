@@ -9,11 +9,13 @@ import app.fasorhub.model.BookingStatus;
 import app.fasorhub.model.SlotStatus;
 import app.fasorhub.model.TimeSlot;
 import app.fasorhub.util.Clock;
+import app.fasorhub.util.Messages;
 import app.fasorhub.util.Tx;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 // Every booking change happens here in one transaction and the booking is always locked before its slots
 public final class BookingService {
@@ -63,8 +65,61 @@ public final class BookingService {
         throw new UnsupportedOperationException("Not implemented yet.");
     }
 
-    public static void expireOverdue(long bookingId) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+    // Runs every overdue booking through expireOverdue and returns how many were changed
+    public static int expireAllOverdue() {
+        LocalDate today = Clock.today();
+        List<Long> ids = Tx.run(c -> BookingDao.findOverdueIds(c, today));
+
+        int changed = 0;
+
+        for (Long id : ids) {
+            if (expireOverdue(id)) {
+                changed++;
+            }
+        }
+
+        return changed;
+    }
+
+    // One booking per transaction so a failure never rolls back the others and running it twice changes nothing
+    public static boolean expireOverdue(long bookingId) {
+        LocalDate today = Clock.today();
+
+        return Tx.run(c -> {
+            Optional<Booking> locked = BookingDao.lockById(c, bookingId);
+
+            if (locked.isEmpty() || !BookingDao.isOverdue(c, bookingId, today)) {
+                return false;
+            }
+
+            Booking booking = locked.get();
+
+            if (booking.status() == BookingStatus.PENDING_VERIFICATION) {
+                BookingDao.reject(c, booking.id(), Messages.get("p26"));
+
+                return true;
+            }
+
+            if (booking.status() == BookingStatus.PENDING_CANCELLATION) {
+                releaseIfApproved(c, booking);
+                BookingDao.setStatus(c, booking.id(), BookingStatus.CANCELLED);
+
+                return true;
+            }
+
+            return false;
+        });
+    }
+
+    // Only a booking that was approved before the cancellation request holds occupied slots
+    static void releaseIfApproved(Connection c, Booking booking) throws SQLException {
+        if (booking.previousStatus() != BookingStatus.APPROVED) {
+            return;
+        }
+
+        List<TimeSlot> slots = SlotDao.lockByBookingOrderedById(c, booking.id());
+
+        SlotDao.setStatus(c, slots.stream().filter(s -> s.status() == SlotStatus.OCCUPIED).map(TimeSlot::id).toList(), SlotStatus.AVAILABLE);
     }
 
     private record Locked(Booking booking, List<TimeSlot> slots) {
