@@ -13,6 +13,7 @@ import java.sql.Statement;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.IntSupplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,7 +39,7 @@ public class AppInitializer implements ServletContextListener {
 
             return thread;
         });
-        scheduler.scheduleAtFixedRate(AppInitializer::runJobs, 0, 1, TimeUnit.HOURS);
+        scheduler.scheduleAtFixedRate(() -> runJobs(), 0, 1, TimeUnit.HOURS);
     }
 
     @Override
@@ -49,12 +50,16 @@ public class AppInitializer implements ServletContextListener {
         Db.close();
     }
 
-    // A failed round is logged and the next hour tries again
     static void runJobs() {
-        try {
-            int expired = BookingService.expireAllOverdue();
+        runJobs(BookingService::expireAllOverdue);
+    }
 
-            LOG.info("Overdue bookings handled: " + expired);
+    // A failed round is logged and the next hour tries again
+    static void runJobs(IntSupplier work) {
+        try {
+            int handled = work.getAsInt();
+
+            LOG.info("Overdue bookings handled: " + handled);
         } catch (RuntimeException e) {
             LOG.log(Level.WARNING, "Scheduled job failed", e);
         }
