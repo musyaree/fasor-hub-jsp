@@ -89,10 +89,10 @@ All demo accounts use the password `password`.
 
 | Email | Role |
 |---|---|
-| `pengguna@contoh.id` | Borrower |
-| `budi@contoh.id` | Borrower |
-| `citra@contoh.id` | Borrower |
-| `pengelola@contoh.id` | Manager |
+| `alice@example.com` | Borrower |
+| `bob@example.com` | Borrower |
+| `carol@example.com` | Borrower |
+| `manager@example.com` | Manager |
 
 > [!WARNING]
 > Never seed demo data on a public deployment.

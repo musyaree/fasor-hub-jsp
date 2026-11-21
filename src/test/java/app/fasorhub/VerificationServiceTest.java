@@ -33,13 +33,13 @@ class VerificationServiceTest {
                 r -> r.getLong(1), email, purpose).orElseThrow());
     }
 
-    private long p3() { return booking("pengguna@contoh.id", "Futsal practice"); }
+    private long p3() { return booking("alice@example.com", "Futsal practice"); }
 
-    private long p5() { return booking("budi@contoh.id", "Lecturer sports activity"); }
+    private long p5() { return booking("bob@example.com", "Lecturer sports activity"); }
 
-    private long p6() { return booking("budi@contoh.id", "Badminton practice"); }
+    private long p6() { return booking("bob@example.com", "Badminton practice"); }
 
-    private long p12() { return booking("budi@contoh.id", "Lecturer futsal practice"); }
+    private long p12() { return booking("bob@example.com", "Lecturer futsal practice"); }
 
     private Booking fresh(long id) {
         return Tx.run(c -> BookingDao.find(c, id).orElseThrow());

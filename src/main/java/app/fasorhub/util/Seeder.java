@@ -44,10 +44,10 @@ public final class Seeder {
     private static void seed(Connection c) throws SQLException {
         String hash = Passwords.hash("password");
 
-        UserDao.insert(c, "Ani Rahmawati", "pengguna@contoh.id", hash, Role.BORROWER, "5025251101", "0812-3456-7890");
-        UserDao.insert(c, "Budi Santoso", "budi@contoh.id", hash, Role.BORROWER, "5025251102", "0813-1111-2222");
-        UserDao.insert(c, "Citra Lestari", "citra@contoh.id", hash, Role.BORROWER, "Himpunan Contoh", "0857-3333-4444");
-        UserDao.insert(c, "Pengelola Fasilitas", "pengelola@contoh.id", hash, Role.MANAGER, null, null);
+        UserDao.insert(c, "Alice Johnson", "alice@example.com", hash, Role.BORROWER, "5025251101", "0812-3456-7890");
+        UserDao.insert(c, "Bob Smith", "bob@example.com", hash, Role.BORROWER, "5025251102", "0813-1111-2222");
+        UserDao.insert(c, "Carol Davis", "carol@example.com", hash, Role.BORROWER, "Example Student Association", "0857-3333-4444");
+        UserDao.insert(c, "Facility Manager", "manager@example.com", hash, Role.MANAGER, null, null);
 
         List<Long> facilityIds = new ArrayList<>();
         facilityIds.add(FacilityDao.insert(c, "Lapangan Futsal A", FacilityType.FUTSAL, null));
@@ -77,21 +77,21 @@ public final class Seeder {
         BookingStatus pc = BookingStatus.PENDING_CANCELLATION;
 
         List<Row> rows = List.of(
-                new Row("pengguna@contoh.id", 1, -5, new int[] {0}, ap, new int[] {7, 9, 10}, "Regular futsal practice", null, null, null, null),
-                new Row("pengguna@contoh.id", 2, 3, new int[] {0, 3}, BookingStatus.REJECTED, new int[] {1, 8, 5}, "Basketball practice", null, null, null,
+                new Row("alice@example.com", 1, -5, new int[] {0}, ap, new int[] {7, 9, 10}, "Regular futsal practice", null, null, null, null),
+                new Row("alice@example.com", 2, 3, new int[] {0, 3}, BookingStatus.REJECTED, new int[] {1, 8, 5}, "Basketball practice", null, null, null,
                         Messages.get("p16")),
-                new Row("pengguna@contoh.id", 1, 4, new int[] {1}, pe, new int[] {1, 8, 15}, "Futsal practice", null, null, null, null),
-                new Row("pengguna@contoh.id", 4, 5, new int[] {2}, ap, new int[] {2, 10, 30}, "Tennis sparring", null, null, null, null),
-                new Row("budi@contoh.id", 1, 4, new int[] {1}, pe, new int[] {1, 9, 40}, "Lecturer sports activity", null, null, null, null),
-                new Row("budi@contoh.id", 3, 4, new int[] {2, 3}, pe, new int[] {1, 11, 0}, "Badminton practice", null, null, null, null),
-                new Row("citra@contoh.id", 4, 6, new int[] {0}, pc, new int[] {3, 13, 0}, "Tennis practice", ap, "The event was cancelled", new int[] {0, 7, 30}, null),
-                new Row("citra@contoh.id", 1, 8, new int[] {1}, pc, new int[] {2, 15, 20}, "Futsal practice", pe, "Clashes with a class schedule", new int[] {0, 8, 45}, null),
-                new Row("citra@contoh.id", 2, -3, new int[] {2}, BookingStatus.CANCELLED, new int[] {6, 12, 0}, "Basketball practice", ap, "Rain", new int[] {4, 9, 0}, null),
-                new Row("citra@contoh.id", 2, -4, new int[] {0}, BookingStatus.REJECTED, new int[] {7, 12, 0}, "Basketball practice", null, null, null,
+                new Row("alice@example.com", 1, 4, new int[] {1}, pe, new int[] {1, 8, 15}, "Futsal practice", null, null, null, null),
+                new Row("alice@example.com", 4, 5, new int[] {2}, ap, new int[] {2, 10, 30}, "Tennis sparring", null, null, null, null),
+                new Row("bob@example.com", 1, 4, new int[] {1}, pe, new int[] {1, 9, 40}, "Lecturer sports activity", null, null, null, null),
+                new Row("bob@example.com", 3, 4, new int[] {2, 3}, pe, new int[] {1, 11, 0}, "Badminton practice", null, null, null, null),
+                new Row("carol@example.com", 4, 6, new int[] {0}, pc, new int[] {3, 13, 0}, "Tennis practice", ap, "The event was cancelled", new int[] {0, 7, 30}, null),
+                new Row("carol@example.com", 1, 8, new int[] {1}, pc, new int[] {2, 15, 20}, "Futsal practice", pe, "Clashes with a class schedule", new int[] {0, 8, 45}, null),
+                new Row("carol@example.com", 2, -3, new int[] {2}, BookingStatus.CANCELLED, new int[] {6, 12, 0}, "Basketball practice", ap, "Rain", new int[] {4, 9, 0}, null),
+                new Row("carol@example.com", 2, -4, new int[] {0}, BookingStatus.REJECTED, new int[] {7, 12, 0}, "Basketball practice", null, null, null,
                         "The court is in use for another activity"),
-                new Row("budi@contoh.id", 2, 9, new int[] {0, 1, 2, 3}, ap, new int[] {5, 10, 0}, "Internal tournament", null, null, null, null),
-                new Row("budi@contoh.id", 1, -3, new int[] {1}, pe, new int[] {6, 16, 0}, "Lecturer futsal practice", null, null, null, null),
-                new Row("citra@contoh.id", 4, -2, new int[] {1}, pc, new int[] {5, 9, 0}, "Tennis practice", ap, "The activity was moved", new int[] {3, 8, 0}, null));
+                new Row("bob@example.com", 2, 9, new int[] {0, 1, 2, 3}, ap, new int[] {5, 10, 0}, "Internal tournament", null, null, null, null),
+                new Row("bob@example.com", 1, -3, new int[] {1}, pe, new int[] {6, 16, 0}, "Lecturer futsal practice", null, null, null, null),
+                new Row("carol@example.com", 4, -2, new int[] {1}, pc, new int[] {5, 9, 0}, "Tennis practice", ap, "The activity was moved", new int[] {3, 8, 0}, null));
 
         for (Row row : rows) {
             var user = UserDao.findByEmail(c, row.email).orElseThrow();
@@ -99,7 +99,7 @@ public final class Seeder {
             LocalDateTime created = today.minusDays(row.created[0]).atTime(row.created[1], row.created[2]);
             Timestamp requested = row.cancelAt == null ? null
                     : Timestamp.valueOf(today.minusDays(row.cancelAt[0]).atTime(row.cancelAt[1], row.cancelAt[2]));
-            String unit = "Himpunan Contoh".equals(user.identity()) ? "Himpunan Contoh" : "Informatics Student";
+            String unit = "Example Student Association".equals(user.identity()) ? "Example Student Association" : "Informatics Student";
 
             long bookingId = Jdbc.insert(c, "INSERT INTO bookings (user_id, organization_unit, participant_count, contact, purpose, status, "
                     + "rejection_reason, cancellation_reason, previous_status, cancellation_requested_at, created_at) VALUES (?, ?, 10, ?, ?, ?, ?, ?, ?, ?, ?)",

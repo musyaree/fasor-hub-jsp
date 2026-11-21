@@ -106,5 +106,5 @@ Label yang tampil ke pengguna (Indonesia) diambil lewat metode `label()` pada en
 ## Yang tetap bahasa Indonesia
 
 - Isi dan nama berkas dokumen (`uc01.md`, `arsitektur.md`, `rencana-uji.md`, dan seterusnya).
-- Nama use case dan aktor (Pengguna, Pengelola), ID pesan (`P01`-`P33`), ID kasus uji, dan data uji (misalnya `pengguna@contoh.id`).
+- Nama use case dan aktor (Pengguna, Pengelola), ID pesan (`P01`-`P33`), ID kasus uji, dan data uji (misalnya `alice@example.com`).
 - [Prototipe](../prototipe/index.html): nama variabel JavaScript di dalamnya masih memakai bahasa Indonesia karena prototipe hanya acuan tampilan dan akan dibuang.

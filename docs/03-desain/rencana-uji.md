@@ -28,10 +28,10 @@ Setiap kasus dijalankan dari data awal di bawah (seeder dijalankan ulang), kecua
 
 | Akun | Email | Peran | Identitas |
 |---|---|---|---|
-| Ani Rahmawati | `pengguna@contoh.id` | Pengguna | 5025251101 |
-| Budi Santoso | `budi@contoh.id` | Pengguna | 5025251102 |
-| Citra Lestari | `citra@contoh.id` | Pengguna | Himpunan Contoh |
-| Pengelola Fasilitas | `pengelola@contoh.id` | Pengelola | (kosong) |
+| Alice Johnson | `alice@example.com` | Pengguna | 5025251101 |
+| Bob Smith | `bob@example.com` | Pengguna | 5025251102 |
+| Carol Davis | `carol@example.com` | Pengguna | Example Student Association |
+| Facility Manager | `manager@example.com` | Pengelola | (kosong) |
 
 **Fasilitas dan sesi:** Lapangan Futsal A, Lapangan Basket A, Lapangan Badminton 1, Lapangan Tenis 1. Setiap fasilitas punya empat sesi per hari (08.00-10.00, 10.00-12.00, 13.00-15.00, 15.00-17.00) untuk 35 hari mulai H-13. Sesi berstatus Ditutup: Futsal A 28 Okt 13.00-15.00 dan 15.00-17.00; Basket A 1 Nov semua sesi.
 
@@ -68,7 +68,7 @@ Kolom: **Pri** prioritas (1 atau 2), **J** jenis (M atau O).
 | AUT-02 | 1 | M | Login pengelola berhasil | Masuk sebagai pengelola | Masuk ke S07 Kelola Jadwal dengan kerangka menu samping |  |
 | AUT-03 | 1 | M | Login gagal | Isi email benar dan password salah, tekan Masuk; lalu ubah isian email | P21 tampil; pesan hilang begitu isian diubah; masuk lagi dengan password salah memunculkan P21 kembali |  |
 | AUT-04 | 2 | M | Registrasi berhasil | Isi semua kolom (termasuk identitas) dengan email baru, tekan Daftar | P24 tampil, diarahkan ke login; akun baru berperan pengguna |  |
-| AUT-05 | 2 | M | Registrasi email sudah ada | Daftar dengan email `pengguna@contoh.id` | P22 tampil, akun tidak bertambah |  |
+| AUT-05 | 2 | M | Registrasi email sudah ada | Daftar dengan email `alice@example.com` | P22 tampil, akun tidak bertambah |  |
 | AUT-06 | 2 | M | Registrasi dengan kolom kosong | Kosongkan kolom identitas (atau kolom lain), tekan Daftar | P23 tampil, akun tidak dibuat |  |
 | AUT-07 | 1 | M | Halaman terlindungi tanpa login | Tanpa login, buka `/schedule`, `/history`, `/verification` | Selalu dialihkan ke `/login` |  |
 | AUT-08 | 2 | M | Logout | Tekan Keluar, lalu tekan tombol Kembali browser | Kembali ke login; halaman terlindungi tidak dapat dibuka tanpa login ulang |  |
