@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 // One waiting booking with everything the verification screen shows
 public record QueueItem(Booking booking, String requesterName, String requesterIdentity, Facility facility, LocalDate date,
                         List<TimeSlot> slots, LocalDateTime createdAt, boolean allAvailable) {
-    private static final DateTimeFormatter SUBMITTED = DateTimeFormatter.ofPattern("d MMM HH:mm", Locale.ENGLISH);
+    private static final DateTimeFormatter SUBMITTED = DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm", Locale.ENGLISH);
     private static final DateTimeFormatter DAY = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
 
     public long getId() {
