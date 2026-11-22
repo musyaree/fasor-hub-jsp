@@ -20,7 +20,9 @@ class DatabaseConstraintsTest {
     }
 
     private static long insertFacility(java.sql.Connection c) throws SQLException {
-        return Jdbc.insert(c, "INSERT INTO facilities (name, type) VALUES ('Court A1', '1')");
+        long type = Jdbc.insert(c, "INSERT INTO facility_types (name) VALUES ('Futsal')");
+
+        return Jdbc.insert(c, "INSERT INTO facilities (name, type_id) VALUES ('Court A1', ?)", type);
     }
 
     @Test
@@ -58,9 +60,31 @@ class DatabaseConstraintsTest {
     }
 
     @Test
-    void outOfRangeFacilityTypeIsRejected() {
+    void aFacilityWithAnUnknownTypeIsRejected() {
         assertThrows(RuntimeException.class, () -> Tx.runVoid(c -> {
-            Jdbc.update(c, "INSERT INTO facilities (name, type) VALUES ('X', '9')");
+            Jdbc.update(c, "INSERT INTO facilities (name, type_id) VALUES ('X', 999999)");
+            return null;
+        }));
+    }
+
+    @Test
+    void duplicateTypeNameIsRejectedEvenWithDifferentCase() {
+        assertThrows(RuntimeException.class, () -> Tx.runVoid(c -> {
+            Jdbc.update(c, "INSERT INTO facility_types (name) VALUES ('Table tennis')");
+            Jdbc.update(c, "INSERT INTO facility_types (name) VALUES ('TABLE TENNIS')");
+            return null;
+        }));
+    }
+
+    @Test
+    void aTypeInUseCannotBeDeleted() {
+        Tx.runVoid(c -> {
+            insertFacility(c);
+            return null;
+        });
+
+        assertThrows(RuntimeException.class, () -> Tx.runVoid(c -> {
+            Jdbc.update(c, "DELETE FROM facility_types");
             return null;
         }));
     }

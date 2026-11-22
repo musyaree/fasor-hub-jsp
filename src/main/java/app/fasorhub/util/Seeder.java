@@ -2,10 +2,10 @@ package app.fasorhub.util;
 
 import app.fasorhub.dao.BookingDao;
 import app.fasorhub.dao.FacilityDao;
+import app.fasorhub.dao.FacilityTypeDao;
 import app.fasorhub.dao.SlotDao;
 import app.fasorhub.dao.UserDao;
 import app.fasorhub.model.BookingStatus;
-import app.fasorhub.model.FacilityType;
 import app.fasorhub.model.Role;
 import app.fasorhub.model.SlotStatus;
 import app.fasorhub.model.TimeSlot;
@@ -50,10 +50,15 @@ public final class Seeder {
         UserDao.insert(c, "Facility Manager", "manager@example.com", hash, Role.MANAGER, null, null);
 
         List<Long> facilityIds = new ArrayList<>();
-        facilityIds.add(FacilityDao.insert(c, "Lapangan Futsal A", FacilityType.FUTSAL, null));
-        facilityIds.add(FacilityDao.insert(c, "Lapangan Basket A", FacilityType.BASKETBALL, null));
-        facilityIds.add(FacilityDao.insert(c, "Lapangan Badminton 1", FacilityType.BADMINTON, null));
-        facilityIds.add(FacilityDao.insert(c, "Lapangan Tenis 1", FacilityType.TENNIS, null));
+        long futsal = FacilityTypeDao.insert(c, "Futsal");
+        long basketball = FacilityTypeDao.insert(c, "Basketball");
+        long badminton = FacilityTypeDao.insert(c, "Badminton");
+        long tennis = FacilityTypeDao.insert(c, "Tennis");
+
+        facilityIds.add(FacilityDao.insert(c, "Lapangan Futsal A", futsal, null));
+        facilityIds.add(FacilityDao.insert(c, "Lapangan Basket A", basketball, null));
+        facilityIds.add(FacilityDao.insert(c, "Lapangan Badminton 1", badminton, null));
+        facilityIds.add(FacilityDao.insert(c, "Lapangan Tenis 1", tennis, null));
 
         LocalDate today = Clock.today();
         LocalDate first = today.minusDays(13);
