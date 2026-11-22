@@ -26,6 +26,7 @@ public class AppInitializer implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent event) {
+        event.getServletContext().setAttribute("assetVersion", System.currentTimeMillis());
         Db.init();
         createSchema();
 

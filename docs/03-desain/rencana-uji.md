@@ -228,7 +228,7 @@ Kasus di bagian ini memakai data awal sebelum perintah terjadwal pernah berjalan
 | KEM-01 | 1 | O | Pengguna mengakses halaman pengelola | Sebagai Ani, buka `/verification`, `/manage-schedule`, `/reports`, `/cancellation-requests` dan kirim POST ke route pengelola | Semuanya 403 |  |
 | KEM-02 | 2 | O | Pengelola mengakses halaman pengguna | Sebagai pengelola, buka `/schedule`, `/booking-status`, `/cancellations`; kirim POST `/bookings` | Semuanya 403 |  |
 | KEM-03 | 1 | O | Kepemilikan data | Lihat UC04-07 dan UC05-07 | Pengguna tidak dapat membaca atau mengubah data pengguna lain |  |
-| KEM-04 | 2 | O | CSRF | Kirim POST tanpa token | Ditolak (419) |  |
+| KEM-04 | 2 | O | CSRF | Kirim POST tanpa token | Ditolak (403) |  |
 | KEM-05 | 2 | O | Password dan peran | Daftar dengan menyisipkan `role=2` di permintaan; periksa kolom password | Akun tetap berperan pengguna; password tersimpan sebagai hash |  |
 | KEM-06 | 2 | M | Keluaran di-escape | Isi keperluan dengan `<script>alert(1)</script>`, buka detail di S08 | Tampil sebagai teks, tidak dijalankan |  |
 

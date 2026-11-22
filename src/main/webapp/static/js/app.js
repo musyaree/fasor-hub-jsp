@@ -178,6 +178,22 @@
     });
   }
 
+  function initPasswordToggle() {
+    document.querySelectorAll('[data-toggle-password]').forEach(function(button) {
+      var input = document.getElementById(button.getAttribute('data-toggle-password'));
+      var icon = button.querySelector('.material-symbols-outlined');
+      if (!input || !icon) {
+        return;
+      }
+      button.addEventListener('click', function() {
+        var hidden = input.getAttribute('type') === 'password';
+        input.setAttribute('type', hidden ? 'text' : 'password');
+        icon.textContent = hidden ? 'visibility_off' : 'visibility';
+        button.setAttribute('aria-label', button.getAttribute(hidden ? 'data-label-hide' : 'data-label-show'));
+      });
+    });
+  }
+
   // ========================================
   // Calendar Month Navigation (placeholder)
   // ========================================
@@ -249,6 +265,7 @@
     initToast();
     initDialogs();
     initFormValidation();
+    initPasswordToggle();
     initCalendar();
     initSelection();
   }
