@@ -28,6 +28,7 @@ Entitas dan relasi tanpa tipe data.
 ```mermaid
 erDiagram
     USER ||--o{ BOOKING : submits
+    FACILITY_TYPE ||--o{ FACILITY : classifies
     FACILITY ||--o{ TIME_SLOT : has
     BOOKING }o--o{ TIME_SLOT : contains
 
@@ -38,9 +39,11 @@ erDiagram
         string identity
         string phone
     }
+    FACILITY_TYPE {
+        string name
+    }
     FACILITY {
         string name
-        string type
         string description
     }
     TIME_SLOT {
@@ -68,7 +71,8 @@ erDiagram
 | Entitas | Deskripsi |
 |---|---|
 | USER | Akun yang masuk ke sistem. Mencakup pengguna (mahasiswa, dosen, organisasi mahasiswa) dan pengelola, dibedakan hanya oleh atribut `role`. Mahasiswa, dosen, dan organisasi mahasiswa diperlakukan sebagai satu aktor "Pengguna" sehingga tidak dibedakan di data. |
-| FACILITY | Lapangan olahraga yang dapat dipinjam (futsal, basket, badminton, tenis). |
+| FACILITY_TYPE | Jenis lapangan (mis. Futsal, Basket, Badminton, Tenis). Pengelola dapat menambah, mengganti nama, dan menghapus jenis (UC10). |
+| FACILITY | Lapangan olahraga yang dapat dipinjam. Setiap fasilitas memiliki satu jenis. |
 | TIME_SLOT | Satu sesi waktu pada satu fasilitas di satu tanggal, dengan status Tersedia, Terisi, atau Ditutup. |
 | BOOKING | Permintaan peminjaman oleh pengguna, dengan status yang berubah menurut alur UC02–UC08. |
 
@@ -77,6 +81,7 @@ erDiagram
 | Relasi | Kardinalitas | Penjelasan |
 |---|---|---|
 | USER submits BOOKING | 1 : N | Satu pengguna dapat mengajukan banyak peminjaman; satu pengajuan dimiliki satu pengguna. |
+| FACILITY_TYPE classifies FACILITY | 1 : N | Satu jenis dipakai banyak fasilitas; satu fasilitas memiliki satu jenis. |
 | FACILITY has TIME_SLOT | 1 : N | Satu fasilitas memiliki banyak sesi; satu sesi milik satu fasilitas. |
 | BOOKING contains TIME_SLOT | N : M | Satu pengajuan dapat memuat beberapa sesi; satu sesi dapat dituju oleh beberapa pengajuan (pengajuan Menunggu Verifikasi tidak mengunci sesi). Relasi ini dipecah menjadi tabel `booking_time_slot` pada model fisik. |
 
@@ -87,6 +92,7 @@ Tabel, tipe data, primary key (PK), dan foreign key (FK).
 ```mermaid
 erDiagram
     users ||--o{ bookings : submits
+    facility_types ||--o{ facilities : classifies
     facilities ||--o{ time_slots : has
     bookings ||--|{ booking_time_slot : contains
     time_slots ||--o{ booking_time_slot : targeted_by
@@ -102,10 +108,16 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
+    facility_types {
+        bigint id PK
+        varchar name UK
+        timestamp created_at
+        timestamp updated_at
+    }
     facilities {
         bigint id PK
         varchar name
-        char type
+        bigint type_id FK
         varchar description
         timestamp created_at
         timestamp updated_at
@@ -145,6 +157,7 @@ erDiagram
 
 | Foreign key | Mengacu ke | Saat dihapus | Keterangan |
 |---|---|---|---|
+| `facilities.type_id` | `facility_types.id` | RESTRICT | Jenis tidak dapat dihapus selama masih dipakai fasilitas |
 | `time_slots.facility_id` | `facilities.id` | RESTRICT | Fasilitas tidak dapat dihapus selama masih punya sesi |
 | `bookings.user_id` | `users.id` | RESTRICT | Pengguna tidak dapat dihapus selama masih punya pengajuan |
 | `booking_time_slot.booking_id` | `bookings.id` | CASCADE | Rincian sesi ikut terhapus bila pengajuan dihapus |
@@ -170,13 +183,22 @@ Kolom: Nama Atribut, Tipe Data, Panjang, Keterangan. Kolom kode ditulis dengan d
 | created_at | TIMESTAMP | - | Waktu akun dibuat |
 | updated_at | TIMESTAMP | - | Waktu akun terakhir diubah |
 
-### 4.2 facilities
+### 4.2 facility_types
+
+| Nama Atribut | Tipe Data | Panjang | Keterangan |
+|---|---|---|---|
+| id | BIGINT | 20 | Primary Key, auto-increment, kode unik jenis |
+| name | VARCHAR | 30 | Nama jenis (mis. Futsal), unik tanpa membedakan huruf besar dan kecil |
+| created_at | TIMESTAMP | - | Waktu data dibuat |
+| updated_at | TIMESTAMP | - | Waktu data terakhir diubah |
+
+### 4.2a facilities
 
 | Nama Atribut | Tipe Data | Panjang | Keterangan |
 |---|---|---|---|
 | id | BIGINT | 20 | Primary Key, auto-increment, kode unik fasilitas |
 | name | VARCHAR | 50 | Nama lapangan (mis. Lapangan Futsal A) |
-| type | CHAR | 1 | Jenis fasilitas (1=Futsal, 2=Basket, 3=Badminton, 4=Tenis) |
+| type_id | BIGINT | 20 | Foreign Key ke facility_types.id |
 | description | VARCHAR | 200 | Informasi tambahan fasilitas; boleh kosong |
 | created_at | TIMESTAMP | - | Waktu data dibuat |
 | updated_at | TIMESTAMP | - | Waktu data terakhir diubah |
@@ -225,7 +247,7 @@ Batas unik: kombinasi (`facility_id`, `date`, `start_time`) tidak boleh berulang
 
 | No | Aturan | Cara menjamin |
 |---|---|---|
-| 1 | `role` hanya 1 atau 2; `status` pengajuan 1–5; `status` sesi 1–3; `type` fasilitas 1–4 | CHECK constraint atau validasi aplikasi |
+| 1 | `role` hanya 1 atau 2; `status` pengajuan 1–5; `status` sesi 1–3 | CHECK constraint atau validasi aplikasi |
 | 2 | `email` unik | Batas unik pada kolom |
 | 3 | Satu sesi tidak boleh dobel untuk fasilitas, tanggal, dan jam yang sama | Batas unik (`facility_id`, `date`, `start_time`) |
 | 4 | `rejection_reason` wajib bila status pengajuan 3; `cancellation_reason` dan `previous_status` wajib bila status 4 atau 5 | Validasi aplikasi |
@@ -273,14 +295,22 @@ CREATE TABLE users (
   CHECK (role IN ('1','2'))
 );
 
+CREATE TABLE facility_types (
+  id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name        VARCHAR(30)  NOT NULL,
+  created_at  TIMESTAMP    NULL,
+  updated_at  TIMESTAMP    NULL,
+  UNIQUE (name)
+);
+
 CREATE TABLE facilities (
   id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name        VARCHAR(50)  NOT NULL,
-  type        CHAR(1)      NOT NULL,
+  type_id     BIGINT UNSIGNED NOT NULL,
   description VARCHAR(200) NULL,
   created_at  TIMESTAMP    NULL,
   updated_at  TIMESTAMP    NULL,
-  CHECK (type IN ('1','2','3','4'))
+  FOREIGN KEY (type_id) REFERENCES facility_types (id) ON DELETE RESTRICT
 );
 
 CREATE TABLE time_slots (

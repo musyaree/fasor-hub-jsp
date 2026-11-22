@@ -2,7 +2,7 @@
 
 # Katalog Pesan Sistem
 
-Daftar final seluruh teks pesan yang tampil kepada pengguna dan pengelola, diambil dari spesifikasi use case UC01–UC09 (P01–P20 dan P30–P32), dari layar autentikasi (P21–P24), dari halaman jadwal (P25), dari aturan sistem (P26), dari daftar kosong di Pembatalan, Verifikasi, dan Penanganan Pembatalan (P27–P29), dan dari hasil filter yang kosong (P33). Aplikasi **berbahasa Inggris**: kolom "Teks (en)" adalah teks yang tampil di aplikasi (`lang/en/messages.php`), sedangkan kolom "Teks (id)" adalah teks acuan yang dikutip di spesifikasi use case dan wireframe. Gunakan dokumen ini sebagai satu-satunya sumber teks saat membuat wireframe dan aplikasi, supaya teks di desain, kode, dan laporan sama persis.
+Daftar final seluruh teks pesan yang tampil kepada pengguna dan pengelola, diambil dari spesifikasi use case UC01–UC09 (P01–P20 dan P30–P32), dari layar autentikasi (P21–P24), dari halaman jadwal (P25), dari aturan sistem (P26), dari daftar kosong di Pembatalan, Verifikasi, dan Penanganan Pembatalan (P27–P29), dari hasil filter yang kosong (P33), dan dari kelola fasilitas dan jenis (UC10, P34–P46). Aplikasi **berbahasa Inggris**: kolom "Teks (en)" adalah teks yang tampil di aplikasi (`lang/en/messages.php`), sedangkan kolom "Teks (id)" adalah teks acuan yang dikutip di spesifikasi use case dan wireframe. Gunakan dokumen ini sebagai satu-satunya sumber teks saat membuat wireframe dan aplikasi, supaya teks di desain, kode, dan laporan sama persis.
 
 ## 1. Jenis pesan
 
@@ -56,15 +56,28 @@ Aturan penulisan: teks toast keberhasilan memakai huruf kapital di awal setiap k
 | P31 | UC04 | A2, pengajuan sudah tidak dapat dibatalkan (dari 3.2) | Pengajuan sudah tidak dapat dibatalkan | The booking can no longer be cancelled | Pesan kesalahan |
 | P32 | UC08 | A3, permintaan pembatalan sudah diproses (dari 2.1) | Permintaan pembatalan sudah diproses | The cancellation request has already been processed | Pesan kesalahan |
 | P33 | UC05, UC07, UC08 | Daftar kosong hanya karena filter, sedangkan daftar tanpa filter berisi data (A6 UC05, A6 UC07, A5 UC08) | Tidak ada pengajuan yang sesuai dengan filter | There are no bookings that match the selected filters | Pemberitahuan |
+| P34 | UC10 | 3.4, fasilitas baru tersimpan | Fasilitas Ditambahkan | Facility Added | Toast hijau |
+| P35 | UC10 | 3.4, perubahan fasilitas tersimpan | Fasilitas Diperbarui | Facility Updated | Toast hijau |
+| P36 | UC10 | 4.3, fasilitas dihapus | Fasilitas Dihapus | Facility Deleted | Toast hijau |
+| P37 | UC10 | A2, fasilitas sudah memiliki pengajuan (dari 4.2) | Fasilitas sudah memiliki pengajuan sehingga tidak dapat dihapus | The facility already has bookings and cannot be deleted | Pesan kesalahan |
+| P38 | UC10 | A1, nama fasilitas kosong atau lebih dari 50 karakter (dari 3.2) | Nama fasilitas wajib diisi dan paling banyak 50 karakter | The facility name is required and can have at most 50 characters | Pesan kesalahan |
+| P39 | UC10 | A1, jenis fasilitas belum dipilih (dari 3.2) | Jenis fasilitas wajib dipilih | Select a facility type | Pesan kesalahan |
+| P40 | UC10 | A1, keterangan lebih dari 200 karakter (dari 3.2) | Keterangan paling banyak 200 karakter | The description can have at most 200 characters | Pesan kesalahan |
+| P41 | UC10 | A4, nama jenis kosong, lebih dari 30 karakter, atau berisi karakter selain huruf, angka, spasi, dan tanda hubung (dari 7.2) | Nama jenis wajib diisi, paling banyak 30 huruf, angka, spasi, atau tanda hubung | The type name is required, with up to 30 letters, digits, spaces, or hyphens | Pesan kesalahan |
+| P42 | UC10 | A5, nama jenis sudah ada tanpa membedakan huruf besar dan kecil (dari 7.2) | Jenis ini sudah ada | This type already exists | Pesan kesalahan |
+| P43 | UC10 | A6, jenis masih dipakai fasilitas (dari 8.2) | Jenis ini dipakai fasilitas dan tidak dapat dihapus | This type is used by facilities and cannot be removed | Pesan kesalahan |
+| P44 | UC10 | 7.3, jenis baru tersimpan | Jenis Ditambahkan | Type Added | Toast hijau |
+| P45 | UC10 | 7.3, nama jenis diubah | Jenis Diperbarui | Type Updated | Toast hijau |
+| P46 | UC10 | 8.3, jenis dihapus | Jenis Dihapus | Type Deleted | Toast hijau |
 
 ## 3. Pesan menurut jenis
 
 | Jenis | Jumlah | ID |
 |---|---|---|
-| Toast hijau | 6 | P02, P06, P10, P12, P17, P24 |
+| Toast hijau | 12 | P02, P06, P10, P12, P17, P24, P34, P35, P36, P44, P45, P46 |
 | Toast merah | 1 | P13 |
 | Toast kuning | 1 | P11 |
-| Pesan kesalahan | 13 | P03, P04, P07, P09, P14, P18, P19, P21, P22, P23, P30, P31, P32 |
+| Pesan kesalahan | 20 | P03, P04, P07, P09, P14, P18, P19, P21, P22, P23, P30, P31, P32, P37, P38, P39, P40, P41, P42, P43 |
 | Peringatan | 1 | P15 |
 | Pemberitahuan | 9 | P01, P05, P08, P20, P25, P27, P28, P29, P33 |
 | Isi formulir | 1 | P16 |
@@ -75,8 +88,8 @@ Aturan penulisan: teks toast keberhasilan memakai huruf kapital di awal setiap k
 - **Status dan label** yang dipakai di pesan harus sama dengan kamus data: status pengajuan (Menunggu Verifikasi, Disetujui, Ditolak, Menunggu Konfirmasi Pembatalan, Dibatalkan) dan status sesi (Tersedia, Terisi, Ditutup).
 - **Pesan P13 (Pengajuan Ditolak)** berwarna merah karena menandakan hasil penolakan, bukan kegagalan sistem. Pesan P11 berwarna kuning karena hasilnya sebagian sesuai permintaan.
 - **Pesan P16** bukan pesan sistem biasa, tetapi nilai awal yang dapat diedit pengelola pada formulir alasan penolakan.
-- **Implementasi Laravel:** simpan teks di berkas bahasa `lang/en/messages.php` dengan kunci sesuai ID (`p01` sampai `p33`), sehingga wireframe, kode, dan laporan merujuk ke teks yang sama.
-- **Kapan pesan kesalahan hilang:** pesan kesalahan validasi (P03, P07, P14, P19, P21, P22, P23) hilang begitu pengguna mengubah isian di formulir yang sama; validasi tetap dijalankan saat tombol ditekan, sehingga pesan muncul lagi bila isian masih tidak valid. Pesan hasil proses sistem tidak mengikuti aturan ini: P04 hilang saat pengguna memilih fasilitas, tanggal, atau sesi lain, dan P18 tetap sampai pengelola mencoba lagi.
+- **Implementasi Laravel:** simpan teks di berkas bahasa `lang/en/messages.php` dengan kunci sesuai ID (`p01` sampai `p46`), sehingga wireframe, kode, dan laporan merujuk ke teks yang sama.
+- **Kapan pesan kesalahan hilang:** pesan kesalahan validasi (P03, P07, P14, P19, P21, P22, P23, P38, P39, P40, P41, P42) hilang begitu pengguna mengubah isian di formulir yang sama; validasi tetap dijalankan saat tombol ditekan, sehingga pesan muncul lagi bila isian masih tidak valid. Pesan hasil proses sistem tidak mengikuti aturan ini: P04 hilang saat pengguna memilih fasilitas, tanggal, atau sesi lain, dan P18 tetap sampai pengelola mencoba lagi.
 - **Aturan isian formulir:** isian yang hanya berisi spasi dianggap kosong; jumlah peserta adalah bilangan bulat 1 atau lebih; batas panjang mengikuti kamus data (unit organisasi 50, kontak 20, keperluan 200, alasan penolakan dan alasan pembatalan 255 karakter) dan ditegakkan dengan batas karakter di formulir, sehingga tidak ada pesan baru untuk isian yang terlalu panjang. Server memeriksa ulang aturan yang sama.
 - **Perubahan teks** dilakukan di dokumen ini lebih dulu (kolom Teks (en), dan Teks (id) bila acuannya berubah), lalu disalin ke berkas bahasa dan spesifikasi use case.
 - **Daftar kosong dan filter:** P08, P28, dan P29 hanya tampil bila daftar kosong **tanpa filter** (tidak ada data sama sekali). Bila filter aktif dan data tanpa filter masih ada tetapi tidak ada yang cocok, tampil P33. Pesan P33 sama untuk S06, S08, dan S09. Kesalahan periode pada filter riwayat memakai P19 yang sudah ada.
