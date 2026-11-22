@@ -2,15 +2,23 @@ package app.fasorhub.dao;
 
 import app.fasorhub.model.Booking;
 import app.fasorhub.model.BookingStatus;
+import app.fasorhub.model.Facility;
+import app.fasorhub.model.QueueItem;
+import app.fasorhub.model.TimeSlot;
 import app.fasorhub.util.Jdbc;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 // Reads and writes the bookings table
 public final class BookingDao {
@@ -49,6 +57,30 @@ public final class BookingDao {
     public static boolean isOverdue(Connection c, long id, LocalDate today) throws SQLException {
         return Jdbc.queryOne(c, "SELECT COUNT(*) FROM bookings b WHERE b.id = ? AND " + HAS_PAST_SLOT, r -> r.getLong(1), id,
                 java.sql.Date.valueOf(today)).orElse(0L) > 0;
+    }
+    private record Waiting(Booking booking, String requesterName, String requesterIdentity, LocalDateTime createdAt) {
+    }
+
+    // Bookings waiting for verification whose date has not passed and the oldest comes first
+    public static List<QueueItem> findQueue(Connection c, LocalDate today) throws SQLException {
+        Map<Long, Facility> facilities = FacilityDao.findAll(c).stream().collect(Collectors.toMap(Facility::id, Function.identity()));
+
+        List<Waiting> waiting = Jdbc.query(c, "SELECT b.*, u.name AS requester_name, u.identity AS requester_identity FROM bookings b "
+                + "JOIN users u ON u.id = b.user_id WHERE b.status = '1' AND NOT " + HAS_PAST_SLOT + " ORDER BY b.created_at, b.id",
+                r -> new Waiting(map(r), r.getString("requester_name"), r.getString("requester_identity"),
+                        r.getTimestamp("created_at").toLocalDateTime()), java.sql.Date.valueOf(today));
+
+        List<QueueItem> queue = new ArrayList<>();
+
+        for (Waiting row : waiting) {
+            List<TimeSlot> slots = SlotDao.findByBooking(c, row.booking().id());
+            TimeSlot first = slots.get(0);
+
+            queue.add(new QueueItem(row.booking(), row.requesterName(), row.requesterIdentity(), facilities.get(first.facilityId()), first.date(),
+                    slots, row.createdAt(), slots.stream().allMatch(s -> s.isAvailable(today))));
+        }
+
+        return queue;
     }
 
     public static void attachSlots(Connection c, long bookingId, Collection<Long> slotIds) throws SQLException {
