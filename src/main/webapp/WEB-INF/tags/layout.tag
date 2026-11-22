@@ -34,7 +34,7 @@
     ${msg.ui_nav_manage_schedule}
   </a>
   <a href="${pageContext.request.contextPath}/verification" class="mobile-nav__link"<c:if test="${currentPage == 'verification'}"> aria-current="page"</c:if>>
-    <span class="material-symbols-outlined">task_alt</span>
+    <span class="material-symbols-outlined">fact_check</span>
     ${msg.ui_nav_verification}
     <c:if test="${navVerification > 0}"><span class="mobile-nav__badge">${navVerification}</span></c:if>
   </a>
@@ -61,7 +61,6 @@
     <div class="sidebar">
       <div class="sidebar__brand">
         <h1 class="sidebar__title">${msg.ui_app_name}</h1>
-        <p class="sidebar__subtitle">${msg.ui_app_tagline}</p>
         <span class="sidebar__role">${msg.ui_role_manager}</span>
       </div>
       <nav class="sidebar__nav">
@@ -70,7 +69,7 @@
         ${msg.ui_nav_manage_schedule}
       </a>
       <a href="${pageContext.request.contextPath}/verification" class="sidebar__link"<c:if test="${currentPage == 'verification'}"> aria-current="page"</c:if>>
-        <span class="material-symbols-outlined sidebar__icon">task_alt</span>
+        <span class="material-symbols-outlined sidebar__icon">fact_check</span>
         ${msg.ui_nav_verification}
         <c:if test="${navVerification > 0}"><span class="sidebar__badge">${navVerification}</span></c:if>
       </a>

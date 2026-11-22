@@ -69,29 +69,24 @@
   // ========================================
 
   function initDialogs() {
-    // Open dialog buttons
-    document.querySelectorAll('[data-dialog-open]').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var dialogId = btn.getAttribute('data-dialog-open');
-        openDialog(dialogId, btn);
-      });
-    });
+    // Delegated so the handlers keep working after a region is replaced
+    document.addEventListener('click', function(e) {
+      var opener = e.target.closest('[data-dialog-open]');
+      if (opener) {
+        openDialog(opener.getAttribute('data-dialog-open'), opener);
+        return;
+      }
 
-    // Close dialog buttons
-    document.querySelectorAll('[data-dialog-close]').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var backdrop = btn.closest('.dialog-backdrop');
+      var closer = e.target.closest('[data-dialog-close]');
+      if (closer) {
+        var backdrop = closer.closest('.dialog-backdrop');
         if (backdrop) closeDialog(backdrop);
-      });
-    });
+        return;
+      }
 
-    // Close on backdrop click
-    document.querySelectorAll('.dialog-backdrop').forEach(function(backdrop) {
-      backdrop.addEventListener('click', function(e) {
-        if (e.target === backdrop) {
-          closeDialog(backdrop);
-        }
-      });
+      if (e.target.classList && e.target.classList.contains('dialog-backdrop')) {
+        closeDialog(e.target);
+      }
     });
 
     // Close on escape
@@ -257,6 +252,77 @@
   }
 
   // ========================================
+  // Async Region (load content with fetch)
+  // ========================================
+
+  var SKELETON_DELAY = 150;
+
+  function initAsyncRegion() {
+    var region = document.querySelector('[data-async-region]');
+    var skeleton = document.getElementById('async-skeleton');
+    if (!region || !skeleton || !window.fetch || !window.DOMParser) return;
+
+    var requestId = 0;
+
+    document.addEventListener('click', function(e) {
+      var link = e.target.closest('a[data-async-link]');
+      if (!link || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      load(link.href, true);
+    });
+
+    window.addEventListener('popstate', function() {
+      load(window.location.href, false);
+    });
+
+    function setBusy(busy) {
+      var current = document.querySelector('[data-async-region]');
+      if (current) current.setAttribute('aria-busy', busy ? 'true' : 'false');
+    }
+
+    function load(url, push) {
+      var id = ++requestId;
+      setBusy(true);
+
+      // The skeleton only shows when the response is slow, so a fast load does not flash
+      var timer = setTimeout(function() {
+        if (id !== requestId) return;
+        var current = document.querySelector('[data-async-region]');
+        current.replaceChildren(skeleton.content.cloneNode(true));
+      }, SKELETON_DELAY);
+
+      fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch' } })
+        .then(function(response) {
+          if (!response.ok) throw new Error('status ' + response.status);
+          return response.text();
+        })
+        .then(function(html) {
+          var next = new DOMParser().parseFromString(html, 'text/html').querySelector('[data-async-region]');
+          if (!next) throw new Error('region missing');
+          if (id !== requestId) return;
+
+          clearTimeout(timer);
+          var current = document.querySelector('[data-async-region]');
+          current.innerHTML = next.innerHTML;
+          current.setAttribute('aria-busy', 'false');
+          if (push) history.pushState(null, '', url);
+
+          initFormValidation();
+          var heading = current.querySelector('#detail-title');
+          if (heading) {
+            heading.setAttribute('tabindex', '-1');
+            heading.focus({ preventScroll: true });
+          }
+        })
+        .catch(function() {
+          // Fall back to a normal page load, which also handles an expired session
+          clearTimeout(timer);
+          if (id === requestId) window.location.href = url;
+        });
+    }
+  }
+
+  // ========================================
   // Initialize All
   // ========================================
 
@@ -268,6 +334,7 @@
     initPasswordToggle();
     initCalendar();
     initSelection();
+    initAsyncRegion();
   }
 
   // Run on DOM ready

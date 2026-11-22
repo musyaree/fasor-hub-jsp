@@ -32,6 +32,11 @@ public final class SlotDao {
         return Jdbc.queryOne(c, "SELECT " + COLUMNS + " FROM time_slots WHERE id = ?", SlotDao::map, id);
     }
 
+    public static List<TimeSlot> findByBooking(Connection c, long bookingId) throws SQLException {
+        return Jdbc.query(c, "SELECT " + COLUMNS + " FROM time_slots WHERE id IN "
+                + "(SELECT time_slot_id FROM booking_time_slot WHERE booking_id = ?) ORDER BY start_time", SlotDao::map, bookingId);
+    }
+
     // Locks the slots of one booking in a fixed order so two approvals cannot deadlock
     public static List<TimeSlot> lockByBookingOrderedById(Connection c, long bookingId) throws SQLException {
         return Jdbc.query(c, "SELECT " + COLUMNS + " FROM time_slots WHERE id IN "

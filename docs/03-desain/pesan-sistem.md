@@ -26,18 +26,18 @@ Aturan penulisan: teks toast keberhasilan memakai huruf kapital di awal setiap k
 | P01 | UC01 | A1, informasi tidak tersedia (dari 2.1) | Informasi belum tersedia | Information is not available yet | Pemberitahuan |
 | P02 | UC02 | 4.3, pengajuan tersimpan | Pengajuan Terkirim | Booking submitted | Toast hijau |
 | P03 | UC02 | A1, data pemohon tidak lengkap (dari 3.1) | Data pemohon belum lengkap, harap dilengkapi | Applicant details are incomplete, please complete them | Pesan kesalahan |
-| P04 | UC02 | A2, sesi tidak tersedia saat kirim (dari 4.1) | Sesi sudah tidak tersedia, silakan pilih sesi lain | The slot is no longer available, please choose another slot | Pesan kesalahan |
+| P04 | UC02 | A2, sesi tidak tersedia saat kirim (dari 4.1) | Sesi sudah tidak tersedia, silakan pilih sesi lain | The session is no longer available, please choose another session | Pesan kesalahan |
 | P05 | UC03 | A1, belum ada pengajuan (dari 1.1) | Belum ada pengajuan yang perlu dipantau | There are no bookings to track yet | Pemberitahuan |
 | P06 | UC04 | 3.5, permintaan pembatalan terkirim | Permintaan Pembatalan Terkirim | Cancellation request sent | Toast hijau |
 | P07 | UC04 | A1, formulir tidak lengkap (dari 3.1) | Formulir tidak lengkap, harap dilengkapi | The form is incomplete, please complete it | Pesan kesalahan |
 | P08 | UC05 | A1, belum ada riwayat (dari 1.3) | Belum ada riwayat peminjaman | There is no booking history yet | Pemberitahuan |
 | P09 | UC05 | A2, gagal memuat data (dari 1.2); disertai tombol "Coba lagi" | Gagal memuat riwayat peminjaman | Failed to load booking history | Pesan kesalahan |
 | P10 | UC06 | 3.3, perubahan jadwal tersimpan | Jadwal Tersimpan | Schedule saved | Toast hijau |
-| P11 | UC06 | A1, ada sesi yang baru terisi (dari 3.1) | Jadwal tersimpan. Ada sesi yang baru terisi, tidak ditutup. | Schedule saved. Some slots were just taken and were not closed. | Toast kuning |
+| P11 | UC06 | A1, ada sesi yang baru terisi (dari 3.1) | Jadwal tersimpan. Ada sesi yang baru terisi, tidak ditutup. | Schedule saved. Some sessions were just taken and were not closed. | Toast kuning |
 | P12 | UC07 | 3.6, pengajuan disetujui | Pengajuan Disetujui | Booking approved | Toast hijau |
 | P13 | UC07 | A1.7, pengajuan ditolak | Pengajuan Ditolak | Booking rejected | Toast merah |
 | P14 | UC07 | A2, alasan penolakan kosong (dari A1.4) | Alasan penolakan wajib diisi | A rejection reason is required | Pesan kesalahan |
-| P15 | UC07 | A3.1, ada sesi tidak tersedia (dari 3.3) | Ada sesi yang tidak tersedia | Some slots are unavailable | Peringatan |
+| P15 | UC07 | A3.1, ada sesi tidak tersedia (dari 3.3) | Ada sesi yang tidak tersedia | Some sessions are unavailable | Peringatan |
 | P16 | UC07 | A3.3, alasan penolakan otomatis | Jadwal yang diajukan sudah tidak tersedia | The requested schedule is no longer available | Isi formulir (dapat diedit) |
 | P17 | UC08 | 2.6, pembatalan dikonfirmasi | Pembatalan Dikonfirmasi | Cancellation confirmed | Toast hijau |
 | P18 | UC08 | A2, pembatalan gagal diproses (dari 2.2) | Pembatalan gagal diproses, silakan coba lagi | The cancellation could not be processed, please try again | Pesan kesalahan |
