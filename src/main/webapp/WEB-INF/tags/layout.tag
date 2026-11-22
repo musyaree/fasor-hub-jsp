@@ -61,7 +61,6 @@
     <div class="sidebar">
       <div class="sidebar__brand">
         <h1 class="sidebar__title">${msg.ui_app_name}</h1>
-        <p class="sidebar__subtitle">${msg.ui_app_tagline}</p>
         <span class="sidebar__role">${msg.ui_role_manager}</span>
       </div>
       <nav class="sidebar__nav">
