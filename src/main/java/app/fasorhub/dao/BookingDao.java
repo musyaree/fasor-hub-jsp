@@ -64,4 +64,24 @@ public final class BookingDao {
     public static void reject(Connection c, long id, String reason) throws SQLException {
         Jdbc.update(c, "UPDATE bookings SET status = '3', rejection_reason = ? WHERE id = ?", reason, id);
     }
+
+    /**
+     * Counts bookings waiting for verification (status = PENDING_VERIFICATION)
+     * that have not passed their booking date.
+     */
+    public static int countPendingVerification(Connection c, LocalDate today) throws SQLException {
+        return Jdbc.queryOne(c,
+                "SELECT COUNT(*) FROM bookings b WHERE b.status = '1' AND NOT " + HAS_PAST_SLOT,
+                r -> r.getInt(1), java.sql.Date.valueOf(today)).orElse(0);
+    }
+
+    /**
+     * Counts bookings waiting for cancellation confirmation (status = PENDING_CANCELLATION)
+     * that have not passed their booking date.
+     */
+    public static int countPendingCancellation(Connection c, LocalDate today) throws SQLException {
+        return Jdbc.queryOne(c,
+                "SELECT COUNT(*) FROM bookings b WHERE b.status = '4' AND NOT " + HAS_PAST_SLOT,
+                r -> r.getInt(1), java.sql.Date.valueOf(today)).orElse(0);
+    }
 }

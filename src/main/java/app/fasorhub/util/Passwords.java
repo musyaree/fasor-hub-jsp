@@ -10,4 +10,9 @@ public final class Passwords {
     public static String hash(String password) {
         return BCrypt.withDefaults().hashToString(10, password.toCharArray());
     }
+
+    public static boolean verify(String password, String hash) {
+        BCrypt.Result result = BCrypt.verifyer().verify(password.toCharArray(), hash);
+        return result.verified;
+    }
 }
