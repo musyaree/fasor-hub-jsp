@@ -175,6 +175,12 @@ public class SecurityFilter implements Filter {
 
     /**
      * Populates request attributes with navigation badge counts for managers.
+     * <p>
+     * Sets:
+     * <ul>
+     *   <li>navVerification - count of bookings pending verification</li>
+     *   <li>navCancellations - count of bookings pending cancellation confirmation</li>
+     * </ul>
      */
     private void populateManagerNavCounts(HttpServletRequest req) {
         try (Connection conn = Db.get()) {
@@ -187,6 +193,7 @@ public class SecurityFilter implements Filter {
             req.setAttribute("navCancellations", cancellationCount);
         } catch (Exception e) {
             // Log error but don't fail the request
+            // Counts will show as 0 if database is unavailable
             req.setAttribute("navVerification", 0);
             req.setAttribute("navCancellations", 0);
         }
