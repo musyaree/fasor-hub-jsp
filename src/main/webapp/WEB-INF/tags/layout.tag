@@ -33,6 +33,10 @@
     <span class="material-symbols-outlined">calendar_month</span>
     ${msg.ui_nav_manage_schedule}
   </a>
+  <a href="${pageContext.request.contextPath}/manage-facilities" class="mobile-nav__link"<c:if test="${currentPage == 'manage-facilities'}"> aria-current="page"</c:if>>
+    <span class="material-symbols-outlined">sports_soccer</span>
+    ${msg.ui_nav_facilities}
+  </a>
   <a href="${pageContext.request.contextPath}/verification" class="mobile-nav__link"<c:if test="${currentPage == 'verification'}"> aria-current="page"</c:if>>
     <span class="material-symbols-outlined">fact_check</span>
     ${msg.ui_nav_verification}
@@ -67,6 +71,10 @@
       <a href="${pageContext.request.contextPath}/manage-schedule" class="sidebar__link"<c:if test="${currentPage == 'manage-schedule'}"> aria-current="page"</c:if>>
         <span class="material-symbols-outlined sidebar__icon">calendar_month</span>
         ${msg.ui_nav_manage_schedule}
+      </a>
+      <a href="${pageContext.request.contextPath}/manage-facilities" class="sidebar__link"<c:if test="${currentPage == 'manage-facilities'}"> aria-current="page"</c:if>>
+        <span class="material-symbols-outlined sidebar__icon">sports_soccer</span>
+        ${msg.ui_nav_facilities}
       </a>
       <a href="${pageContext.request.contextPath}/verification" class="sidebar__link"<c:if test="${currentPage == 'verification'}"> aria-current="page"</c:if>>
         <span class="material-symbols-outlined sidebar__icon">fact_check</span>

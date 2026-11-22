@@ -236,7 +236,7 @@ Kasus di bagian ini memakai data awal sebelum perintah terjadwal pernah berjalan
 
 | ID | Pri | J | Yang diuji | Langkah | Hasil yang diharapkan | Hasil aktual |
 |---|---|---|---|---|---|---|
-| UI-01 | 2 | O | Katalog pesan identik | Bandingkan setiap kunci `p01`-`p33` di `lang/en/messages.php` dengan kolom Teks (en) di `pesan-sistem.md` | Semua teks sama persis |  |
+| UI-01 | 2 | O | Katalog pesan identik | Bandingkan setiap kunci `p01`-`p46` di `lang/en/messages.php` dengan kolom Teks (en) di `pesan-sistem.md` | Semua teks sama persis |  |
 | UI-02 | 2 | M | Kerangka dan lencana pengelola | Login sebagai pengelola; proses satu pengajuan dan satu pembatalan | Menu samping dengan lima menu; lencana Verifikasi dan Pembatalan sama dengan isi antrian dan daftar, berkurang setelah proses, dan hilang saat 0; pengguna memakai bar atas |  |
 | UI-03 | 2 | M | Jenis pesan | Periksa warna P02, P06, P10, P12, P17, P24 (hijau), P13 (merah), P11 (kuning) | Warna sesuai jenis di katalog |  |
 
@@ -252,11 +252,27 @@ Lingkungan ukur: aplikasi yang sudah dideploy di Railway, data uji sesuai bagian
 | NF-04 | 2 | M | Reliability setelah uji konflik | Setelah semua kasus KON, periksa basis data | Tidak ada dua pengajuan menguasai satu sesi |  |
 | NF-05 | 2 | M | Deployment dari nol | Di database kosong jalankan migrasi dan seeder; buka aplikasi di Railway; tunggu service cron berjalan satu kali | Data awal sesuai bagian 2; aplikasi dapat dibuka; cron berjalan dan keluar sendiri tanpa kesalahan; data kedaluwarsa berubah sesuai KON-01 dan KON-02 |  |
 
+### 3.15 UC10 Mengelola Fasilitas (S11)
+
+Fitur tambahan di luar rancangan awal, dibutuhkan agar sistem punya CRUD lengkap.
+
+| ID | Pri | J | Yang diuji | Langkah | Hasil yang diharapkan | Hasil aktual |
+|---|---|---|---|---|---|---|
+| FAC-01 | 1 | O | Tambah fasilitas | Panggil layanan tambah dengan nama, jenis Futsal, dan keterangan yang valid | P34; fasilitas tersimpan dengan data yang sama; ada 140 sesi (35 hari kali 4 sesi) berstatus Tersedia dari hari ini sampai 34 hari ke depan; hari ke-35 tidak punya sesi |  |
+| FAC-02 | 1 | O | Validasi tambah dan ubah | Kirim nama kosong, spasi saja, atau 51 karakter; jenis kosong atau tidak dikenal; keterangan 201 karakter; lalu nama 50 dan keterangan 200 karakter | P38, P39, P40 sesuai isian yang salah dan tidak ada yang tersimpan; batas 50 dan 200 karakter diterima; spasi di tepi dibuang dan keterangan kosong disimpan sebagai kosong |  |
+| FAC-03 | 1 | O | Ubah fasilitas | Ubah nama, jenis, dan keterangan Futsal A yang sudah punya pengajuan; ubah fasilitas yang sudah dihapus | P35; data berubah dan jumlah sesinya sama; fasilitas yang sudah tidak ada memberi P01 |  |
+| FAC-04 | 1 | O | Hapus fasilitas tanpa pengajuan | Tambah fasilitas baru lalu hapus | P36; fasilitas dan seluruh sesinya hilang; menghapus fasilitas yang sudah tidak ada memberi P01 |  |
+| FAC-05 | 1 | O | Hapus ditolak bila ada pengajuan | Hapus Futsal A; hapus fasilitas yang pengajuannya Ditolak atau Dibatalkan; hapus fasilitas ketika pengajuan baru sedang disimpan | P37 di semua kasus; fasilitas dan sesinya tidak berubah; penghapusan menunggu pengajuan yang sedang disimpan lalu ditolak |  |
+| FAC-06 | 2 | M | Antarmuka dan akses | Sebagai pengelola buka S11, tambah, ubah, lalu klik Hapus dan Batal; buka Kelola jenis, tambah dan ganti nama jenis, lalu pilih jenis itu di formulir fasilitas; buka `/manage-facilities` sebagai Ani; kirim POST tanpa token | Daftar dan formulir tampil; Hapus membuka dialog konfirmasi dan Batal tidak menghapus; pesan validasi tampil di bawah kolomnya dengan isian tetap; Ani mendapat 403; POST tanpa token mendapat 403 |  |
+| FAC-07 | 1 | O | Tambah dan ubah jenis | Tambah jenis dengan spasi berlebih di tepi dan di tengah; ubah nama jenis yang dipakai fasilitas; ubah hanya huruf besar dan kecilnya; tambah jenis 30 karakter | P44 dan P45; spasi dirapikan; fasilitas yang memakai jenis itu menampilkan nama baru; empat jenis awal dari seeder ada |  |
+| FAC-08 | 2 | O | Validasi jenis | Kirim nama kosong, spasi saja, 31 karakter, atau berisi `@`, `!`, `<`, dan diawali tanda hubung; tambah nama yang sudah ada dengan huruf besar atau spasi berbeda; ubah menjadi nama jenis lain; tambah nama yang sama dari delapan permintaan serentak | P41 atau P42 dan tidak ada yang tersimpan; hanya satu dari delapan permintaan serentak tersimpan dan sisanya P42 |  |
+| FAC-09 | 1 | O | Hapus jenis | Hapus jenis yang dipakai fasilitas; hapus jenis yang tidak dipakai; hapus fasilitas terakhir dari satu jenis lalu hapus jenisnya; pilih jenis yang sudah dihapus saat menyimpan fasilitas | P43 untuk jenis yang dipakai; P46 untuk jenis yang tidak dipakai; jenis yang sudah dihapus memberi P39 saat dipilih |  |
+
 ## 4. Keterlacakan
 
 Tag di kolom referensi memakai: `P..` pesan, `AI..` aturan integritas ([model-data.md](model-data.md)), `INV..` invarian ([state-diagram.md](state-diagram.md)), `UCxx-A..` alur alternatif, `K..` keputusan antarmuka ([wireframe.md](wireframe.md), bagian 1.6), `D1` dan `D3` keputusan pemeriksaan kriteria.
 
-### 4.1 Pesan P01-P33
+### 4.1 Pesan P01-P46
 
 | Tag | Kasus uji |
 |---|---|
@@ -293,6 +309,19 @@ Tag di kolom referensi memakai: `P..` pesan, `AI..` aturan integritas ([model-da
 | P31 | UC04-05, UC04-06 |
 | P32 | UC08-06 |
 | P33 | UC05-11, UC07-16, UC08-11 |
+| P34 | FAC-01, FAC-06 |
+| P35 | FAC-03, FAC-06 |
+| P36 | FAC-04, FAC-06 |
+| P37 | FAC-05, FAC-06 |
+| P38 | FAC-02, FAC-06 |
+| P39 | FAC-02, FAC-06 |
+| P40 | FAC-02, FAC-06 |
+| P41 | FAC-08, FAC-06 |
+| P42 | FAC-08 |
+| P43 | FAC-09, FAC-06 |
+| P44 | FAC-07, FAC-06 |
+| P45 | FAC-07 |
+| P46 | FAC-09, FAC-06 |
 
 ### 4.2 Aturan integritas 1-13
 
@@ -363,6 +392,7 @@ Tag di kolom referensi memakai: `P..` pesan, `AI..` aturan integritas ([model-da
 | Akhir inkremen 1 (fondasi, autentikasi, UC01) | AUT-01, AUT-02, AUT-03, AUT-04, AUT-05, AUT-06, AUT-07, AUT-08, UC01-01, UC01-02, UC01-03, UC01-04, UC01-05, UC01-06 |
 | Akhir inkremen 2 (UC02, UC07, UC03) | UC02-01, UC02-02, UC02-03, UC02-04, UC02-05, UC02-06, UC02-07, UC02-08, UC02-09, UC02-10, UC02-11, UC03-01, UC03-02, UC03-03, UC03-04, UC03-05, UC03-06, UC07-01, UC07-02, UC07-03, UC07-04, UC07-05, UC07-06, UC07-07, UC07-08, UC07-09, UC07-10, UC07-11, UC07-12, UC07-13, UC07-14, UC07-15, UC07-16 |
 | Akhir inkremen 3 (UC04, UC08, UC05, UC06, UC09) | UC04-01, UC04-02, UC04-03, UC04-04, UC04-05, UC04-06, UC04-07, UC05-01, UC05-02, UC05-03, UC05-04, UC05-05, UC05-06, UC05-07, UC06-01, UC06-02, UC06-03, UC06-04, UC06-05, UC06-06, UC06-07, UC06-08, UC08-01, UC08-02, UC08-03, UC08-04, UC08-05, UC08-06, UC08-07, UC08-08, UC09-01, UC09-02, UC09-03, UC09-04, UC09-05, KON-01, KON-02, KON-03, KON-04, KON-05, KON-06, KON-07, KON-08, KON-09, KON-10, KON-11, KON-12, KON-13, KON-14, KON-15, KEM-01, KEM-02, KEM-03, KEM-04, KEM-05, KEM-06, UI-01, UI-02, UI-03, UC05-08, UC05-09, UC05-10, UC05-11, UC08-09, UC08-10, UC08-11 |
+| Fitur tambahan (UC10 Mengelola Fasilitas) | FAC-01, FAC-02, FAC-03, FAC-04, FAC-05, FAC-06, FAC-07, FAC-08, FAC-09 |
 | Setelah deployment di Railway | NF-01, NF-02, NF-03, NF-04, NF-05 |
 
 Kasus yang menggabungkan beberapa use case (KON, KEM-01 dan KEM-03) dijalankan di akhir inkremen tempat use case terakhir yang dilibatkan selesai.
@@ -375,9 +405,9 @@ Kasus yang menggabungkan beberapa use case (KON, KEM-01 dan KEM-03) dijalankan d
 
 | Ringkasan | Jumlah |
 |---|---|
-| Total kasus uji | 118 |
-| Prioritas 1 | 50 |
-| Prioritas 2 | 68 |
+| Total kasus uji | 127 |
+| Prioritas 1 | 57 |
+| Prioritas 2 | 70 |
 | Otomatis (O) | 40 |
 | Manual (M) | 78 |
 | Lulus | |

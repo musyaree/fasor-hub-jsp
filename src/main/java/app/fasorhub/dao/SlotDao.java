@@ -67,6 +67,21 @@ public final class SlotDao {
                 facilityId, java.sql.Date.valueOf(date), java.sql.Time.valueOf(start), java.sql.Time.valueOf(end), status.code());
     }
 
+    // Locks every slot of one facility in a fixed order so a delete cannot deadlock with a booking
+    public static List<Long> lockIdsByFacilityOrderedById(Connection c, long facilityId) throws SQLException {
+        return Jdbc.query(c, "SELECT id FROM time_slots WHERE facility_id = ? ORDER BY id FOR UPDATE", r -> r.getLong(1), facilityId);
+    }
+
+    // True when any booking, whatever its status, still points at a slot of this facility
+    public static boolean hasBookings(Connection c, long facilityId) throws SQLException {
+        return Jdbc.queryOne(c, "SELECT COUNT(*) FROM booking_time_slot bts JOIN time_slots ts ON ts.id = bts.time_slot_id "
+                + "WHERE ts.facility_id = ?", r -> r.getLong(1), facilityId).orElse(0L) > 0;
+    }
+
+    public static void deleteByFacility(Connection c, long facilityId) throws SQLException {
+        Jdbc.update(c, "DELETE FROM time_slots WHERE facility_id = ?", facilityId);
+    }
+
     public static long count(Connection c) throws SQLException {
         return Jdbc.queryOne(c, "SELECT COUNT(*) FROM time_slots", r -> r.getLong(1)).orElse(0L);
     }

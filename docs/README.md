@@ -27,6 +27,7 @@ Setiap dokumen berisi spesifikasi, activity diagram (kode PlantUML), user story,
 | UC07 dan UC07.1 | Memverifikasi Pengajuan dan Memberikan Alasan Penolakan | Pengelola | [uc07.md](02-use-case/uc07.md) |
 | UC08 | Menangani Pembatalan | Pengelola | [uc08.md](02-use-case/uc08.md) |
 | UC09 | Melihat Laporan Penggunaan | Pengelola | [uc09.md](02-use-case/uc09.md) |
+| UC10 | Mengelola Fasilitas dan Jenis (fitur tambahan) | Pengelola | [uc10.md](02-use-case/uc10.md) |
 
 ## Desain
 
@@ -34,12 +35,12 @@ Setiap dokumen berisi spesifikasi, activity diagram (kode PlantUML), user story,
 |---|---|
 | [model-data.md](03-desain/model-data.md) | ERD konseptual dan fisik, kamus data, aturan integritas, pemetaan use case ke tabel, DDL |
 | [state-diagram.md](03-desain/state-diagram.md) | Lima status pengajuan dan tiga status sesi, transisi, dan invarian |
-| [pesan-sistem.md](03-desain/pesan-sistem.md) | Katalog 33 pesan sistem (P01-P33) dengan teks acuan Indonesia dan teks aplikasi Inggris, jenis, dan pemicu |
+| [pesan-sistem.md](03-desain/pesan-sistem.md) | Katalog 46 pesan sistem (P01-P46) dengan teks acuan Indonesia dan teks aplikasi Inggris, jenis, dan pemicu |
 | [wireframe.md](03-desain/wireframe.md) | Wireframe 10 layar, konvensi, peta navigasi, dan keputusan antarmuka |
 | [diagram-sekuens.md](03-desain/diagram-sekuens.md) | Diagram sekuens UC02, UC07, dan UC06 |
 | [penamaan.md](03-desain/penamaan.md) | Konvensi penamaan: identifier kode berbahasa Inggris, daftar padanan Indonesia ke Inggris |
 | [arsitektur.md](03-desain/arsitektur.md) | MVC Laravel, route dan controller per use case, layanan dan penguncian, keamanan, perintah terjadwal, deployment di Railway |
-| [rencana-uji.md](03-desain/rencana-uji.md) | 118 kasus uji, data uji, dan keterlacakan ke pesan, aturan integritas, invarian, dan alur alternatif |
+| [rencana-uji.md](03-desain/rencana-uji.md) | 127 kasus uji, data uji, dan keterlacakan ke pesan, aturan integritas, invarian, dan alur alternatif |
 
 ## Desain visual
 
@@ -61,4 +62,4 @@ Acuan visual high-fidelity dibuat di Stitch: [https://stitch.google.com/projects
 - **Status pengajuan:** Menunggu Verifikasi, Disetujui, Ditolak, Menunggu Konfirmasi Pembatalan, Dibatalkan.
 - **Status sesi:** Tersedia, Terisi, Ditutup.
 - Identifier kode (tabel, kolom, kelas, metode, route) memakai bahasa Inggris, teks yang tampil ke pengguna tetap bahasa Indonesia; padanannya ada di [penamaan.md](03-desain/penamaan.md).
-- Teks pesan yang tampil ke pengguna hanya ditulis di [pesan-sistem.md](03-desain/pesan-sistem.md); desain, kode, dan laporan merujuk ke ID pesan (P01-P33).
+- Teks pesan yang tampil ke pengguna hanya ditulis di [pesan-sistem.md](03-desain/pesan-sistem.md); desain, kode, dan laporan merujuk ke ID pesan (P01-P46).

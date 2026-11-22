@@ -895,6 +895,10 @@ textarea.form-input {
   text-align: right;
 }
 
+.table td.text-right .btn + .btn {
+  margin-left: var(--space-2);
+}
+
 /* Row selection */
 .table__row--selected {
   background: var(--color-brand-tint);
@@ -950,6 +954,8 @@ textarea.form-input {
 }
 
 .card-list__actions {
+  display: flex;
+  gap: var(--space-2);
   margin-top: var(--space-3);
   padding-top: var(--space-3);
   border-top: 1px solid var(--color-hairline);
@@ -1780,5 +1786,98 @@ textarea.form-input {
 @media (prefers-reduced-motion: reduce) {
   .skeleton {
     animation: none;
+  }
+}
+
+/* ========================================
+   Facility management
+   ======================================== */
+
+.card__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.card__header .card__title {
+  margin: 0;
+}
+
+.card__tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.row-meta {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.row-actions {
+  display: inline-flex;
+  gap: var(--space-2);
+}
+
+.row-actions form {
+  margin: 0;
+}
+
+.table__truncate {
+  max-width: 18rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.type-list {
+  list-style: none;
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.type-list__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.type-list__name {
+  display: block;
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+}
+
+.type-form {
+  padding-top: var(--space-2);
+}
+
+.card__tools .btn {
+  white-space: nowrap;
+}
+
+@media (max-width: 799px) {
+  .card__tools {
+    width: 100%;
+  }
+
+  .card__tools .btn,
+  .card-list__actions .btn {
+    flex: 1;
   }
 }

@@ -21,10 +21,10 @@
         <p class="auth__subhead">${msg.ui_auth_subhead}</p>
       </div>
       <ul class="auth__facilities">
-        <li><span class="material-symbols-outlined" aria-hidden="true">sports_soccer</span>${msg['facility_type.1']}</li>
-        <li><span class="material-symbols-outlined" aria-hidden="true">sports_basketball</span>${msg['facility_type.2']}</li>
-        <li>${msg['facility_type.3']}</li>
-        <li><span class="material-symbols-outlined" aria-hidden="true">sports_tennis</span>${msg['facility_type.4']}</li>
+        <li><span class="material-symbols-outlined" aria-hidden="true">sports_soccer</span>${msg.ui_auth_futsal}</li>
+        <li><span class="material-symbols-outlined" aria-hidden="true">sports_basketball</span>${msg.ui_auth_basketball}</li>
+        <li>${msg.ui_auth_badminton}</li>
+        <li><span class="material-symbols-outlined" aria-hidden="true">sports_tennis</span>${msg.ui_auth_tennis}</li>
       </ul>
     </section>
 

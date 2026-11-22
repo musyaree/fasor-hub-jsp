@@ -9,7 +9,7 @@ A campus sports facility booking system (Java 21, Servlet + JSP + JSTL, JDBC, My
 ## Naming and language
 
 - Code identifiers are English (see `docs/03-desain/penamaan.md`). The UI is English only.
-- All message texts live in `src/main/resources/messages_en.properties` (keys `p01`-`p33`). Never hard-code message text in servlets or JSP.
+- All message texts live in `src/main/resources/messages_en.properties` (keys `p01`-`p46`). Never hard-code message text in servlets or JSP.
 
 ## Architecture
 
