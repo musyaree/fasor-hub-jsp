@@ -98,6 +98,22 @@
     });
   }
 
+  // A dialog the server rendered open gets focus and a focus trap like one opened by a click
+  function initOpenDialogs() {
+    document.querySelectorAll('.dialog-backdrop.is-open').forEach(function(backdrop) {
+      var autofocus = backdrop.querySelector('[autofocus]');
+      var dialog = backdrop.querySelector('.dialog');
+      if (!dialog) return;
+      if (autofocus) {
+        autofocus.focus();
+      } else {
+        var first = dialog.querySelector('button, [href], input, select, textarea');
+        if (first) first.focus();
+      }
+      trapFocus(dialog);
+    });
+  }
+
   var lastFocusedElement = null;
 
   function openDialog(dialogId, trigger) {
@@ -330,6 +346,7 @@
     initMobileMenu();
     initToast();
     initDialogs();
+    initOpenDialogs();
     initFormValidation();
     initPasswordToggle();
     initCalendar();
