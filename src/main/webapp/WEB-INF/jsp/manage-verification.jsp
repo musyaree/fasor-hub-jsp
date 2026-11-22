@@ -6,9 +6,13 @@
 
   <c:choose>
     <c:when test="${empty queue}">
-      <t:empty message="${msg.p28}" icon="task_alt"/>
+      <section class="card">
+        <h2 class="card__title card__title--divided">${msg.ui_queue}</h2>
+        <t:empty message="${msg.p28}" icon="fact_check"/>
+      </section>
     </c:when>
     <c:otherwise>
+      <div data-async-region>
       <section class="card">
         <h2 class="card__title">${msg.ui_queue}</h2>
 
@@ -31,7 +35,7 @@
                   <td class="table__strong"><c:out value="${item.requesterName}"/> (<c:out value="${item.requesterIdentity}"/>)</td>
                   <td><c:out value="${item.facilityName}"/></td>
                   <td><c:out value="${item.dateLabel}"/></td>
-                  <td class="text-right"><a class="btn <c:out value="${isSelected ? 'btn--primary' : 'btn--secondary'}"/>" href="${base}?booking=${item.id}">${isSelected ? msg.ui_selected : msg.ui_select}</a></td>
+                  <td class="text-right"><a data-async-link class="btn <c:out value="${isSelected ? 'btn--primary' : 'btn--secondary'}"/>" href="${base}?booking=${item.id}">${isSelected ? msg.ui_selected : msg.ui_select}</a></td>
                 </tr>
               </c:forEach>
             </tbody>
@@ -46,7 +50,7 @@
                 <span class="card-list__meta"><c:out value="${item.submittedLabel}"/></span>
               </div>
               <div class="card-list__meta"><c:out value="${item.facilityName}"/>, <c:out value="${item.dateLabel}"/></div>
-              <div class="card-list__actions"><a class="btn btn--secondary" href="${base}?booking=${item.id}">${msg.ui_select}</a></div>
+              <div class="card-list__actions"><a data-async-link class="btn btn--secondary" href="${base}?booking=${item.id}">${msg.ui_select}</a></div>
             </div>
           </c:forEach>
         </div>
@@ -64,7 +68,7 @@
             <div class="detail__item"><dt>${msg.ui_facility}</dt><dd><c:out value="${selected.facilityName}"/></dd></div>
             <div class="detail__item"><dt>${msg.ui_date}</dt><dd><c:out value="${selected.dateLabel}"/></dd></div>
             <div class="detail__item"><dt>${msg.ui_sessions}</dt><dd><c:out value="${selected.slotRanges}"/></dd></div>
-            <div class="detail__item detail__item--wide"><dt>${msg.ui_purpose}</dt><dd><c:out value="${selected.purpose}"/></dd></div>
+            <div class="detail__item detail__item--wide detail__item--text"><dt>${msg.ui_purpose}</dt><dd><c:out value="${selected.purpose}"/></dd></div>
           </dl>
 
           <c:if test="${not selected.allAvailable}">
@@ -114,6 +118,43 @@
           </div>
         </div>
       </c:if>
+      </div>
+
+      <template id="async-skeleton">
+        <section class="card" aria-hidden="true">
+          <h2 class="card__title">${msg.ui_queue}</h2>
+          <div class="skeleton-list">
+            <c:forEach begin="1" end="3">
+              <div class="skeleton-row">
+                <span class="skeleton skeleton--w3"></span>
+                <span class="skeleton skeleton--w5"></span>
+                <span class="skeleton skeleton--w4"></span>
+                <span class="skeleton skeleton--w3"></span>
+                <span class="skeleton skeleton--button"></span>
+              </div>
+            </c:forEach>
+          </div>
+        </section>
+        <section class="card" aria-hidden="true">
+          <h2 class="card__title card__title--divided">${msg.ui_details}</h2>
+          <div class="skeleton-detail">
+            <c:forEach begin="1" end="6">
+              <div class="skeleton-detail__item">
+                <span class="skeleton skeleton--label"></span>
+                <span class="skeleton skeleton--value"></span>
+              </div>
+            </c:forEach>
+            <div class="skeleton-detail__item skeleton-detail__item--wide">
+              <span class="skeleton skeleton--label"></span>
+              <span class="skeleton skeleton--value"></span>
+            </div>
+          </div>
+          <div class="actions">
+            <span class="skeleton skeleton--button"></span>
+            <span class="skeleton skeleton--button"></span>
+          </div>
+        </section>
+      </template>
     </c:otherwise>
   </c:choose>
 </t:layout>
