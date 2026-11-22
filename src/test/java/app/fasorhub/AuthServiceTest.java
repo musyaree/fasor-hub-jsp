@@ -145,4 +145,37 @@ class AuthServiceTest {
         User user = AuthService.register("Borrower", "borrower@example.com", "pass", "id", "phone");
         assertEquals(Role.BORROWER, user.role());
     }
+
+    @Test
+    void concurrentRegistrationsWithSameEmailCreateOneAccount() throws Exception {
+        int attempts = 8;
+        java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newFixedThreadPool(attempts);
+        java.util.concurrent.CountDownLatch start = new java.util.concurrent.CountDownLatch(1);
+        java.util.List<java.util.concurrent.Future<String>> results = new java.util.ArrayList<>();
+        for (int i = 0; i < attempts; i++) {
+            results.add(pool.submit(() -> {
+                start.await();
+                try {
+                    AuthService.register("Racer", "race@example.com", "secret", "1", "08");
+                    return "ok";
+                } catch (ValidationException e) {
+                    return e.getMessageKey();
+                }
+            }));
+        }
+        start.countDown();
+        int created = 0;
+        for (java.util.concurrent.Future<String> f : results) {
+            String outcome = f.get();
+            if (outcome.equals("ok")) {
+                created++;
+            } else {
+                assertEquals("p22", outcome);
+            }
+        }
+        pool.shutdown();
+
+        assertEquals(1, created);
+        assertEquals(1, TestDb.count("SELECT COUNT(*) FROM users WHERE email = 'race@example.com'"));
+    }
 }
