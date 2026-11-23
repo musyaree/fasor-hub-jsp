@@ -1,13 +1,16 @@
 package app.fasorhub.service;
 
 import app.fasorhub.dao.BookingDao;
+import app.fasorhub.dao.FacilityDao;
 import app.fasorhub.dao.SlotDao;
 import app.fasorhub.exception.BookingStatusChangedException;
 import app.fasorhub.exception.SlotUnavailableException;
 import app.fasorhub.exception.ValidationException;
 import app.fasorhub.model.Booking;
 import app.fasorhub.model.BookingStatus;
+import app.fasorhub.model.Facility;
 import app.fasorhub.model.SlotStatus;
+import app.fasorhub.model.StatusItem;
 import app.fasorhub.model.TimeSlot;
 import app.fasorhub.util.Clock;
 import app.fasorhub.util.Messages;
@@ -15,8 +18,12 @@ import app.fasorhub.util.Tx;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 // Every booking change happens here in one transaction and the booking is always locked before its slots
 public final class BookingService {
@@ -118,6 +125,36 @@ public final class BookingService {
             BookingDao.reject(c, booking.id(), reason);
 
             return null;
+        });
+    }
+
+    /**
+     * Returns all bookings for a user whose booking date is today or later,
+     * most recently created first.
+     */
+    public static List<StatusItem> upcomingFor(long userId) {
+        LocalDate today = Clock.today();
+
+        return Tx.run(c -> {
+            Map<Long, Facility> facilities = FacilityDao.findAll(c).stream()
+                    .collect(Collectors.toMap(Facility::id, Function.identity()));
+
+            List<BookingDao.UpcomingBooking> rows = BookingDao.findUpcomingByUser(c, userId, today);
+            List<StatusItem> items = new ArrayList<>();
+
+            for (BookingDao.UpcomingBooking row : rows) {
+                List<TimeSlot> slots = SlotDao.findByBooking(c, row.booking().id());
+                if (slots.isEmpty()) {
+                    continue;
+                }
+
+                TimeSlot first = slots.get(0);
+                Facility facility = facilities.get(first.facilityId());
+
+                items.add(new StatusItem(row.booking(), facility, first.date(), slots, row.createdAt()));
+            }
+
+            return items;
         });
     }
 

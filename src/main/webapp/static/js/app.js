@@ -243,6 +243,11 @@
             if (otherTarget) {
               otherTarget.classList.remove('table__row--selected', 'card-list__item--selected');
             }
+            // Hide other detail cards
+            var otherDetail = document.querySelector('[data-detail-for="' + otherId + '"]');
+            if (otherDetail) {
+              otherDetail.hidden = true;
+            }
           });
         }
 
@@ -252,9 +257,16 @@
           target.classList.add('table__row--selected', 'card-list__item--selected');
         }
 
-        // Focus detail card if exists
+        // Show and focus detail card if exists
         var detailCard = document.querySelector('[data-detail-for="' + targetId + '"]');
         if (detailCard) {
+          // Hide placeholder
+          var placeholder = document.getElementById('detail-placeholder');
+          if (placeholder) {
+            placeholder.hidden = true;
+          }
+
+          detailCard.hidden = false;
           var heading = detailCard.querySelector('h2, h3, [tabindex="-1"]');
           if (heading) {
             heading.focus();
