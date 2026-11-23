@@ -1881,3 +1881,171 @@ textarea.form-input {
     flex: 1;
   }
 }
+
+/* ========================================
+   Schedule page (S03)
+   ======================================== */
+
+.schedule-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 800px) {
+  .schedule-layout {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+  }
+}
+
+.schedule__step {
+  display: flex;
+  flex-direction: column;
+}
+
+.schedule__section {
+  margin-bottom: var(--space-5);
+}
+
+.schedule__section-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.schedule__actions {
+  margin-top: auto;
+  padding-top: var(--space-4);
+}
+
+.schedule__actions .btn {
+  width: 100%;
+}
+
+/* Slot list */
+.slot-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.slot-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-hairline);
+}
+
+.slot-item__time {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.slot-item--approved {
+  background: var(--color-status-available-bg);
+  border-color: var(--color-status-available);
+}
+
+.slot-item--rejected {
+  background: var(--color-status-occupied-bg);
+  border-color: var(--color-status-occupied);
+}
+
+.slot-item--closed {
+  background: var(--color-status-closed-bg);
+  border-color: var(--color-status-closed);
+}
+
+/* Summary */
+.summary {
+  margin: 0;
+}
+
+.summary__item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-2) 0;
+  font-size: var(--font-size-sm);
+}
+
+.summary__item + .summary__item {
+  border-top: 1px solid var(--color-hairline);
+}
+
+.summary dt {
+  color: var(--color-text-muted);
+}
+
+.summary dd {
+  margin: 0;
+  font-weight: 500;
+  text-align: right;
+}
+
+/* Calendar legend colors */
+.calendar__legend-color--available {
+  background: var(--color-status-available-bg);
+  border: 1px solid var(--color-status-available);
+}
+
+.calendar__legend-color--partial {
+  background: var(--color-status-pending-bg);
+  border: 1px solid var(--color-status-pending);
+}
+
+.calendar__legend-color--full {
+  background: var(--color-status-occupied-bg);
+  border: 1px solid var(--color-status-occupied);
+}
+
+.calendar__legend-color--closed {
+  background: var(--color-status-closed-bg);
+  border: 1px solid var(--color-status-closed);
+}
+
+.calendar__legend-color--past {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+}
+
+/* Calendar cell as link */
+a.calendar__cell {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+a.calendar__cell:hover {
+  opacity: 0.85;
+}
+
+a.calendar__cell:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: -2px;
+}
+
+/* Calendar disabled navigation */
+.calendar__nav-btn--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Notice info variant */
+.notice--info {
+  color: var(--color-brand);
+  background: var(--color-brand-tint);
+}
+
+/* Form hint with icon */
+.form-hint .material-symbols-outlined {
+  vertical-align: text-bottom;
+  font-size: 18px;
+}
