@@ -85,4 +85,11 @@ public final class SlotDao {
     public static long count(Connection c) throws SQLException {
         return Jdbc.queryOne(c, "SELECT COUNT(*) FROM time_slots", r -> r.getLong(1)).orElse(0L);
     }
+
+    /** Returns all slots for a facility in a date range, ordered by date then start time */
+    public static List<TimeSlot> findByFacilityAndDateRange(Connection c, long facilityId, LocalDate from, LocalDate to) throws SQLException {
+        return Jdbc.query(c,
+                "SELECT " + COLUMNS + " FROM time_slots WHERE facility_id = ? AND `date` >= ? AND `date` <= ? ORDER BY `date`, start_time",
+                SlotDao::map, facilityId, java.sql.Date.valueOf(from), java.sql.Date.valueOf(to));
+    }
 }
