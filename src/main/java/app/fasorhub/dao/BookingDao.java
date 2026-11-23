@@ -147,4 +147,31 @@ public final class BookingDao {
 
     public record UpcomingBooking(Booking booking, LocalDateTime createdAt) {
     }
+
+    /**
+     * Finds bookings for a user that can be cancelled:
+     * status is PENDING_VERIFICATION or APPROVED, and booking date is today or later.
+     * Returns the most recently created first.
+     */
+    public static List<UpcomingBooking> findCancellableByUser(Connection c, long userId, LocalDate today) throws SQLException {
+        String hasFutureSlot = "EXISTS (SELECT 1 FROM booking_time_slot bts JOIN time_slots ts ON ts.id = bts.time_slot_id "
+                + "WHERE bts.booking_id = b.id AND ts.`date` >= ?)";
+
+        return Jdbc.query(c,
+                "SELECT b.*, b.created_at AS submitted_at FROM bookings b "
+                        + "WHERE b.user_id = ? AND b.status IN ('1', '2') AND " + hasFutureSlot
+                        + " ORDER BY b.created_at DESC, b.id DESC",
+                r -> new UpcomingBooking(map(r), r.getTimestamp("submitted_at").toLocalDateTime()),
+                userId, java.sql.Date.valueOf(today));
+    }
+
+    /**
+     * Transitions a booking to PENDING_CANCELLATION status.
+     * Saves the previous status and cancellation reason.
+     */
+    public static void requestCancellation(Connection c, long id, BookingStatus previousStatus, String reason) throws SQLException {
+        Jdbc.update(c,
+                "UPDATE bookings SET status = '4', previous_status = ?, cancellation_reason = ?, cancellation_requested_at = NOW() WHERE id = ?",
+                previousStatus.code(), reason, id);
+    }
 }
