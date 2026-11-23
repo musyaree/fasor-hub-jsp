@@ -339,6 +339,64 @@
   }
 
   // ========================================
+  // Booking Form (Schedule page)
+  // ========================================
+
+  function initBookingForm() {
+    var form = document.querySelector('[data-booking-form]');
+    if (!form) return;
+
+    var slotCheckboxes = form.querySelectorAll('[data-slot-checkbox]');
+    var submitBtn = form.querySelector('[data-submit-btn]');
+    var selectedCountEl = form.querySelector('[data-selected-count]');
+    var agreeCheckbox = form.querySelector('[data-agree-checkbox]');
+    var confirmBtn = form.querySelector('[data-confirm-btn]');
+
+    var MAX_SLOTS = 4;
+
+    function updateState() {
+      var checked = form.querySelectorAll('[data-slot-checkbox]:checked');
+      var count = checked.length;
+
+      // Update count display
+      if (selectedCountEl) {
+        selectedCountEl.textContent = count + ' of 4 selected';
+      }
+
+      // Enable/disable submit button
+      if (submitBtn) {
+        submitBtn.disabled = count === 0;
+      }
+
+      // Disable unchecked slots when max is reached
+      slotCheckboxes.forEach(function(cb) {
+        if (!cb.checked && count >= MAX_SLOTS) {
+          cb.disabled = true;
+          cb.closest('.slot-item').classList.add('slot-item--max-reached');
+        } else if (!cb.disabled || cb.closest('.slot-item').classList.contains('slot-item--max-reached')) {
+          cb.disabled = false;
+          cb.closest('.slot-item').classList.remove('slot-item--max-reached');
+        }
+      });
+    }
+
+    // Listen to checkbox changes
+    slotCheckboxes.forEach(function(cb) {
+      cb.addEventListener('change', updateState);
+    });
+
+    // Agreement checkbox enables confirm button
+    if (agreeCheckbox && confirmBtn) {
+      agreeCheckbox.addEventListener('change', function() {
+        confirmBtn.disabled = !agreeCheckbox.checked;
+      });
+    }
+
+    // Initial state
+    updateState();
+  }
+
+  // ========================================
   // Initialize All
   // ========================================
 
@@ -352,6 +410,7 @@
     initCalendar();
     initSelection();
     initAsyncRegion();
+    initBookingForm();
   }
 
   // Run on DOM ready
