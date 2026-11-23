@@ -2126,3 +2126,39 @@ label.slot-item:hover {
 .terms-list li:last-child {
   margin-bottom: 0;
 }
+
+/* ========================================
+   Status Page (S04)
+   ======================================== */
+
+.status-layout {
+  display: grid;
+  gap: var(--space-6);
+}
+
+@media (min-width: 1024px) {
+  .status-layout {
+    grid-template-columns: 1fr 400px;
+    align-items: start;
+  }
+}
+
+.status__detail[hidden] {
+  display: none;
+}
+
+.status__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+/* Rejection reason styling */
+.detail__rejection {
+  color: var(--color-status-occupied);
+  background: var(--color-status-occupied-bg);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  font-style: italic;
+}
