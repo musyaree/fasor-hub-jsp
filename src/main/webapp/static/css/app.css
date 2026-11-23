@@ -2162,3 +2162,41 @@ label.slot-item:hover {
   border-radius: var(--radius-sm);
   font-style: italic;
 }
+
+/* ========================================
+   Cancellation Page (S05)
+   ======================================== */
+
+.cancel-layout {
+  display: grid;
+  gap: var(--space-6);
+}
+
+@media (min-width: 1024px) {
+  .cancel-layout {
+    grid-template-columns: 1fr 400px;
+    align-items: start;
+  }
+}
+
+.cancel__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.cancel-form {
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-hairline);
+}
+
+.btn--danger {
+  background: var(--color-status-occupied);
+  color: white;
+}
+
+.btn--danger:hover {
+  background: color-mix(in srgb, var(--color-status-occupied) 90%, black);
+}
