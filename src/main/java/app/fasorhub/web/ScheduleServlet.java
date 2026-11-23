@@ -1,9 +1,14 @@
 package app.fasorhub.web;
 
 import app.fasorhub.dao.FacilityDao;
+import app.fasorhub.exception.SlotUnavailableException;
+import app.fasorhub.exception.ValidationException;
+import app.fasorhub.filter.SecurityFilter;
 import app.fasorhub.model.Facility;
 import app.fasorhub.model.MonthGrid;
 import app.fasorhub.model.TimeSlot;
+import app.fasorhub.model.User;
+import app.fasorhub.service.BookingService;
 import app.fasorhub.service.ScheduleService;
 import app.fasorhub.util.Clock;
 import app.fasorhub.util.Db;
@@ -18,6 +23,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -112,6 +118,79 @@ public class ScheduleServlet extends BaseServlet {
         } catch (SQLException e) {
             throw new ServletException("Database error", e);
         }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // Get user from session
+        User user = (User) req.getSession().getAttribute(SecurityFilter.USER_ATTR);
+
+        // Collect slot IDs from form
+        String[] slotParams = req.getParameterValues("slots");
+        List<Long> slotIds = new ArrayList<>();
+        if (slotParams != null) {
+            for (String s : slotParams) {
+                try {
+                    slotIds.add(Long.parseLong(s));
+                } catch (NumberFormatException ignored) {
+                    // Skip invalid slot ids
+                }
+            }
+        }
+
+        // Get applicant data
+        String unit = param(req, "unit");
+        Integer participants = paramPositiveInt(req, "participants");
+        String contact = param(req, "contact");
+        String purpose = param(req, "purpose");
+
+        // Build redirect URL preserving current view state
+        Long facilityId = paramLong(req, "facility");
+        String month = param(req, "month");
+        String date = param(req, "date");
+        String redirectUrl = buildRedirectUrl(facilityId, month, date);
+
+        try {
+            BookingService.submit(
+                    user.id(),
+                    unit,
+                    participants == null ? 0 : participants,
+                    contact,
+                    purpose,
+                    slotIds
+            );
+
+            // Success - redirect to booking status page
+            flashSuccess(req, msg("p02"));
+            redirect(req, resp, "/booking-status");
+
+        } catch (ValidationException e) {
+            // Incomplete data - return to schedule with error
+            flashError(req, msg(e.getMessageKey()));
+            redirect(req, resp, redirectUrl);
+
+        } catch (SlotUnavailableException e) {
+            // Slot no longer available - return to schedule with error
+            flashError(req, msg(e.getMessageKey()));
+            redirect(req, resp, redirectUrl);
+        }
+    }
+
+    private String buildRedirectUrl(Long facilityId, String month, String date) {
+        StringBuilder url = new StringBuilder("/schedule");
+        String sep = "?";
+        if (facilityId != null) {
+            url.append(sep).append("facility=").append(facilityId);
+            sep = "&";
+        }
+        if (month != null) {
+            url.append(sep).append("month=").append(month);
+            sep = "&";
+        }
+        if (date != null) {
+            url.append(sep).append("date=").append(date);
+        }
+        return url.toString();
     }
 
     private YearMonth parseMonth(String value) {
