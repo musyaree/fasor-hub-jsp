@@ -158,8 +158,76 @@ public final class BookingService {
         });
     }
 
-    public static void requestCancellation(long bookingId, String reason) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+    /**
+     * Returns all bookings for a user that can be cancelled:
+     * status is PENDING_VERIFICATION or APPROVED, and date is today or later.
+     */
+    public static List<StatusItem> cancellableFor(long userId) {
+        LocalDate today = Clock.today();
+
+        return Tx.run(c -> {
+            Map<Long, Facility> facilities = FacilityDao.findAll(c).stream()
+                    .collect(Collectors.toMap(Facility::id, Function.identity()));
+
+            List<BookingDao.UpcomingBooking> rows = BookingDao.findCancellableByUser(c, userId, today);
+            List<StatusItem> items = new ArrayList<>();
+
+            for (BookingDao.UpcomingBooking row : rows) {
+                List<TimeSlot> slots = SlotDao.findByBooking(c, row.booking().id());
+                if (slots.isEmpty()) {
+                    continue;
+                }
+
+                TimeSlot first = slots.get(0);
+                Facility facility = facilities.get(first.facilityId());
+
+                items.add(new StatusItem(row.booking(), facility, first.date(), slots, row.createdAt()));
+            }
+
+            return items;
+        });
+    }
+
+    /**
+     * Requests cancellation for a booking.
+     *
+     * @throws ValidationException      if reason is blank (p07)
+     * @throws BookingStatusChangedException if booking cannot be cancelled (p31)
+     */
+    public static void requestCancellation(long userId, long bookingId, String reason) throws ValidationException {
+        // Validate reason is not blank
+        if (reason == null || reason.isBlank()) {
+            throw new ValidationException("p07");
+        }
+
+        LocalDate today = Clock.today();
+
+        Tx.runVoid(c -> {
+            // Lock the booking
+            Booking booking = BookingDao.lockById(c, bookingId)
+                    .orElseThrow(() -> new BookingStatusChangedException("p31"));
+
+            // Check ownership
+            if (booking.userId() != userId) {
+                throw new BookingStatusChangedException("p31");
+            }
+
+            // Check status is cancellable (PENDING_VERIFICATION or APPROVED)
+            if (booking.status() != BookingStatus.PENDING_VERIFICATION
+                    && booking.status() != BookingStatus.APPROVED) {
+                throw new BookingStatusChangedException("p31");
+            }
+
+            // Check booking date is not in the past
+            if (BookingDao.isOverdue(c, bookingId, today)) {
+                throw new BookingStatusChangedException("p31");
+            }
+
+            // Save previous status and change to PENDING_CANCELLATION
+            BookingDao.requestCancellation(c, bookingId, booking.status(), reason);
+
+            return null;
+        });
     }
 
     public static void confirmCancellation(long bookingId) {
