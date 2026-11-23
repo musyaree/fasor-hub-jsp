@@ -128,4 +128,23 @@ public final class BookingDao {
                 "SELECT COUNT(*) FROM bookings b WHERE b.status = '4' AND NOT " + HAS_PAST_SLOT,
                 r -> r.getInt(1), java.sql.Date.valueOf(today)).orElse(0);
     }
+
+    /**
+     * Finds all bookings for a user whose booking date is today or later.
+     * Returns the most recently created first.
+     */
+    public static List<UpcomingBooking> findUpcomingByUser(Connection c, long userId, LocalDate today) throws SQLException {
+        // HAS_FUTURE_SLOT: booking has at least one slot dated >= today
+        String hasFutureSlot = "EXISTS (SELECT 1 FROM booking_time_slot bts JOIN time_slots ts ON ts.id = bts.time_slot_id "
+                + "WHERE bts.booking_id = b.id AND ts.`date` >= ?)";
+
+        return Jdbc.query(c,
+                "SELECT b.*, b.created_at AS submitted_at FROM bookings b "
+                        + "WHERE b.user_id = ? AND " + hasFutureSlot + " ORDER BY b.created_at DESC, b.id DESC",
+                r -> new UpcomingBooking(map(r), r.getTimestamp("submitted_at").toLocalDateTime()),
+                userId, java.sql.Date.valueOf(today));
+    }
+
+    public record UpcomingBooking(Booking booking, LocalDateTime createdAt) {
+    }
 }
