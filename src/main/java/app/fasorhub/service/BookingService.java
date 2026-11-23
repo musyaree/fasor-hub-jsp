@@ -4,6 +4,7 @@ import app.fasorhub.dao.BookingDao;
 import app.fasorhub.dao.SlotDao;
 import app.fasorhub.exception.BookingStatusChangedException;
 import app.fasorhub.exception.SlotUnavailableException;
+import app.fasorhub.exception.ValidationException;
 import app.fasorhub.model.Booking;
 import app.fasorhub.model.BookingStatus;
 import app.fasorhub.model.SlotStatus;
@@ -22,8 +23,71 @@ public final class BookingService {
     private BookingService() {
     }
 
-    public static long submit(long userId, String unit, int participants, String contact, String purpose, List<Long> slotIds) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+    /**
+     * Submits a new booking request.
+     * <p>
+     * Validates that:
+     * <ul>
+     *   <li>1 to 4 slots are selected</li>
+     *   <li>All slots belong to the same facility and date</li>
+     *   <li>All slots are available (not past, occupied, or closed)</li>
+     * </ul>
+     * Locks slots by id before checking to prevent race conditions.
+     *
+     * @return the new booking id
+     * @throws SlotUnavailableException if any slot is not available (p04)
+     * @throws ValidationException if input is invalid (p03)
+     */
+    public static long submit(long userId, String unit, int participants, String contact, String purpose, List<Long> slotIds)
+            throws ValidationException {
+        // Validate input data (outside transaction)
+        if (unit == null || unit.isBlank() || participants < 1 || contact == null || contact.isBlank()
+                || purpose == null || purpose.isBlank()) {
+            throw new ValidationException("p03");
+        }
+
+        // Validate slot count (1-4)
+        if (slotIds == null || slotIds.isEmpty() || slotIds.size() > 4) {
+            throw new ValidationException("p03");
+        }
+
+        LocalDate today = Clock.today();
+
+        return Tx.run(c -> {
+            // Lock slots in id order to prevent deadlock
+            List<TimeSlot> slots = SlotDao.lockByIdsOrderedById(c, slotIds);
+
+            // Check all requested slots were found
+            if (slots.size() != slotIds.size()) {
+                throw new SlotUnavailableException("p04");
+            }
+
+            // Validate all slots are from same facility and same date
+            long facilityId = slots.get(0).facilityId();
+            LocalDate date = slots.get(0).date();
+
+            for (TimeSlot slot : slots) {
+                if (slot.facilityId() != facilityId || !slot.date().equals(date)) {
+                    // Slots from different facilities/dates - this is a programming error or tampering
+                    throw new SlotUnavailableException("p04");
+                }
+            }
+
+            // Check all slots are available
+            for (TimeSlot slot : slots) {
+                if (!slot.isAvailable(today)) {
+                    throw new SlotUnavailableException("p04");
+                }
+            }
+
+            // Create the booking
+            long bookingId = BookingDao.insert(c, userId, unit, participants, contact, purpose);
+
+            // Attach slots to booking
+            BookingDao.attachSlots(c, bookingId, slotIds);
+
+            return bookingId;
+        });
     }
 
     // Approval needs every slot to be available and then occupies them all or none
