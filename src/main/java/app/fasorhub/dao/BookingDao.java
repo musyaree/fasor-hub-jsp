@@ -98,6 +98,18 @@ public final class BookingDao {
     }
 
     /**
+     * Inserts a new booking with PENDING_VERIFICATION status.
+     *
+     * @return the generated booking id
+     */
+    public static long insert(Connection c, long userId, String unit, int participants, String contact, String purpose) throws SQLException {
+        return Jdbc.insert(c,
+                "INSERT INTO bookings (user_id, organization_unit, participant_count, contact, purpose, status, created_at) "
+                        + "VALUES (?, ?, ?, ?, ?, '1', NOW())",
+                userId, unit, participants, contact, purpose);
+    }
+
+    /**
      * Counts bookings waiting for verification (status = PENDING_VERIFICATION)
      * that have not passed their booking date.
      */

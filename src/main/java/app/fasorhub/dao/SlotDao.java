@@ -86,6 +86,19 @@ public final class SlotDao {
         return Jdbc.queryOne(c, "SELECT COUNT(*) FROM time_slots", r -> r.getLong(1)).orElse(0L);
     }
 
+    /**
+     * Locks slots by their IDs in ascending order to prevent deadlocks.
+     * Returns the slots in id order for consistent locking.
+     */
+    public static List<TimeSlot> lockByIdsOrderedById(Connection c, Collection<Long> ids) throws SQLException {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        return Jdbc.query(c,
+                "SELECT " + COLUMNS + " FROM time_slots WHERE id IN (" + Jdbc.marks(ids.size()) + ") ORDER BY id FOR UPDATE",
+                SlotDao::map, ids.toArray());
+    }
+
     /** Returns all slots for a facility in a date range, ordered by date then start time */
     public static List<TimeSlot> findByFacilityAndDateRange(Connection c, long facilityId, LocalDate from, LocalDate to) throws SQLException {
         return Jdbc.query(c,
