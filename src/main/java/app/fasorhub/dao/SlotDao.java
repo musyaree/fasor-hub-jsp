@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.time.YearMonth;
 
 // Reads and writes the time slots table
 public final class SlotDao {
@@ -104,5 +105,21 @@ public final class SlotDao {
         return Jdbc.query(c,
                 "SELECT " + COLUMNS + " FROM time_slots WHERE facility_id = ? AND `date` >= ? AND `date` <= ? ORDER BY `date`, start_time",
                 SlotDao::map, facilityId, java.sql.Date.valueOf(from), java.sql.Date.valueOf(to));
+    }
+
+    public static List<TimeSlot> findByFacilityAndMonth(Connection c, long facilityId, YearMonth month) throws SQLException {
+        LocalDate start = month.atDay(1);
+        LocalDate end = month.plusMonths(1).atDay(1);
+        return Jdbc.query(
+            c,
+            "SELECT " + COLUMNS
+                    + " FROM time_slots"
+                    + " WHERE facility_id = ? AND `date` >= ? AND `date` < ?"
+                    + " ORDER BY `date`, start_time",
+            SlotDao::map,
+            facilityId,
+            java.sql.Date.valueOf(start),
+            java.sql.Date.valueOf(end)
+        );
     }
 }

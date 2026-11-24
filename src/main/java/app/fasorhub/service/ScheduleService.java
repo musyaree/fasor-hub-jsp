@@ -8,6 +8,7 @@ import app.fasorhub.model.SlotStatus;
 import app.fasorhub.model.TimeSlot;
 import app.fasorhub.util.Clock;
 import app.fasorhub.util.Db;
+import app.fasorhub.util.Tx;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.DayOfWeek;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.EnumMap;
 
 /**
  * Schedule viewing and slot management.
@@ -50,7 +52,6 @@ public final class ScheduleService {
             }
         }
     }
-
     /**
      * Builds a monthly calendar grid for a facility.
      *
@@ -165,6 +166,57 @@ public final class ScheduleService {
     }
 
     public static boolean save(Map<Long, SlotStatus> changes) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+        if (changes == null || changes.isEmpty()) {
+            return false;
+        }
+        // Only allow changes to Available or Closed. Invalid input is rejected, not treated as a session conflict.
+        boolean invalidChange = changes.entrySet().stream()
+                .anyMatch(entry ->
+                        entry.getKey() == null
+                                || (entry.getValue() != SlotStatus.AVAILABLE && entry.getValue() != SlotStatus.CLOSED));
+        if (invalidChange) {
+            throw new IllegalArgumentException("Schedule changes must have an ID and target Available or Closed");
+        }
+        // Taking and sorting IDs ensures that locking is always done deterministically.
+        List<Long> ids = changes.keySet().stream()
+                .filter(id -> id != null)
+                .sorted()
+                .toList();
+        return Tx.run(c -> saveChanges(c, changes, ids));
+    }
+    
+    private static boolean saveChanges(Connection c, Map<Long, SlotStatus> changes, List<Long> ids) throws SQLException {
+        // FOR UPDATE making a slot unmodifiable by other transactions until this transaction is completed.
+        List<TimeSlot> locked = SlotDao.lockByIdsOrderedById(c, ids);
+        LocalDate today = Clock.today();
+        // ID null is considered a conflict even though it cannot be locked.
+        boolean conflict = changes.keySet().stream()
+                .anyMatch(id -> id == null);
+        Map<SlotStatus, List<Long>> updates =
+                new EnumMap<>(SlotStatus.class);
+
+        for (TimeSlot slot : locked) {
+            SlotStatus requested = changes.get(slot.id());
+            // Skip slot if: no status change is provided, the slot is currently OCCUPIED, the slot date is in the past.
+            if (requested == null || slot.status() == SlotStatus.OCCUPIED || slot.date().isBefore(today)) {
+                conflict = true;
+                continue;
+            }
+            updates.computeIfAbsent(
+                    requested,
+                    ignored -> new ArrayList<>()
+            ).add(slot.id());
+        }
+
+        // If number of locked slots is less than the number of IDs, it means some IDs were not found and a conflict is marked.
+        if (locked.size() != ids.size()) {
+            conflict = true;
+        }
+        // Update the slots that passed the check (Executed based on the status groups).
+        for (Map.Entry<SlotStatus, List<Long>> update :
+                updates.entrySet()) {
+            SlotDao.setStatus(c, update.getValue(), update.getKey());
+        }
+        return conflict;
     }
 }
