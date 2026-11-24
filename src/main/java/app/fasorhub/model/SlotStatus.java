@@ -23,6 +23,10 @@ public enum SlotStatus implements Coded {
         return code;
     }
 
+    public String getCode() {
+        return code;
+    }
+
     public String getLabel() {
         return app.fasorhub.util.Messages.get("slot_status." + code);
     }
