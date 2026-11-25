@@ -202,4 +202,151 @@ public final class BookingDao {
                 "UPDATE bookings SET status = '4', previous_status = ?, cancellation_reason = ?, cancellation_requested_at = NOW() WHERE id = ?",
                 previousStatus.code(), reason, id);
     }
+
+    // One booking with its requester, facility, date, and matching session count.
+    public record ReportBooking(
+            Booking booking,
+            String requesterName,
+            String facilityName,
+            LocalDate bookingDate,
+            long sessionCount) {
+    }
+
+    // Facility utilization only counts sessions from approved bookings.
+    public record FacilityUsage(
+            long facilityId,
+            String facilityName,
+            long bookingCount,
+            long occupiedSessions,
+            long bookableSessions) {
+
+        public int usagePercent() {
+            if (bookableSessions == 0) {
+                return 0;
+            }
+            return (int) Math.round(occupiedSessions * 100.0 / bookableSessions);
+        }
+    }
+
+    // Finds booking details for sessions within the requested date range.
+    public static List<ReportBooking> findReportBookings(
+            Connection c, LocalDate startDate, LocalDate endDate, Long facilityId) throws SQLException {
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT b.*, u.name AS requester_name, f.id AS facility_id, f.name AS facility_name, "
+                        + "MIN(ts.`date`) AS booking_date, COUNT(*) AS session_count "
+                        + "FROM bookings b "
+                        + "JOIN users u ON u.id = b.user_id "
+                        + "JOIN booking_time_slot bts ON bts.booking_id = b.id "
+                        + "JOIN time_slots ts ON ts.id = bts.time_slot_id "
+                        + "JOIN facilities f ON f.id = ts.facility_id "
+                        + "WHERE ts.`date` BETWEEN ? AND ? ");
+
+        List<Object> params = new ArrayList<>();
+        params.add(java.sql.Date.valueOf(startDate));
+        params.add(java.sql.Date.valueOf(endDate));
+
+        if (facilityId != null) {
+            sql.append("AND f.id = ? ");
+            params.add(facilityId);
+        }
+
+        sql.append("GROUP BY b.id, u.name, f.id, f.name ")
+                .append("ORDER BY booking_date DESC, b.id DESC");
+
+        return Jdbc.query(c, sql.toString(), row -> new ReportBooking(
+                map(row),
+                row.getString("requester_name"),
+                row.getString("facility_name"),
+                row.getDate("booking_date").toLocalDate(),
+                row.getLong("session_count")), params.toArray());
+    }
+
+    // Aggregates approved bookings and excludes closed sessions from the denominator.
+    public static List<FacilityUsage> findFacilityUsage(
+            Connection c, LocalDate startDate, LocalDate endDate, Long facilityId) throws SQLException {
+        StringBuilder sql = new StringBuilder(
+                "SELECT f.id AS facility_id, f.name AS facility_name, "
+                        + "(SELECT COUNT(DISTINCT b.id) "
+                        + " FROM bookings b "
+                        + " JOIN booking_time_slot bts ON bts.booking_id = b.id "
+                        + " JOIN time_slots ts ON ts.id = bts.time_slot_id "
+                        + " WHERE ts.facility_id = f.id AND ts.`date` BETWEEN ? AND ? AND b.status = '2') "
+                        + " AS booking_count, "
+                        + "(SELECT COUNT(*) "
+                        + " FROM bookings b "
+                        + " JOIN booking_time_slot bts ON bts.booking_id = b.id "
+                        + " JOIN time_slots ts ON ts.id = bts.time_slot_id "
+                        + " WHERE ts.facility_id = f.id AND ts.`date` BETWEEN ? AND ? AND b.status = '2') "
+                        + " AS occupied_sessions, "
+                        + "(SELECT COUNT(*) FROM time_slots ts "
+                        + " WHERE ts.facility_id = f.id AND ts.`date` BETWEEN ? AND ? AND ts.status <> '3') "
+                        + " AS bookable_sessions "
+                        + "FROM facilities f ");
+
+        List<Object> params = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            params.add(java.sql.Date.valueOf(startDate));
+            params.add(java.sql.Date.valueOf(endDate));
+        }
+        if (facilityId != null) {
+            sql.append("WHERE f.id = ? ");
+            params.add(facilityId);
+        }
+        sql.append("ORDER BY f.name");
+        return Jdbc.query(c, sql.toString(), row -> new FacilityUsage(
+                row.getLong("facility_id"),
+                row.getString("facility_name"),
+                row.getLong("booking_count"),
+                row.getLong("occupied_sessions"),
+                row.getLong("bookable_sessions")), params.toArray());
+    private record WaitingCancellation(Booking booking, String requesterName, String requesterIdentity, LocalDateTime requestedAt) {
+    }
+
+    public static List<QueueItem> findCancellationQueue(Connection c, LocalDate today) throws SQLException {
+        Map<Long, Facility> facilities = FacilityDao.findAll(c).stream()
+                .collect(Collectors.toMap(Facility::id, Function.identity()));
+
+        // Query only PendingCancellation bookings that have at least one future session.
+        List<WaitingCancellation> waiting = Jdbc.query(
+                c,
+                "SELECT b.*, u.name AS requester_name, u.identity AS requester_identity "
+                        + "FROM bookings b "
+                        + "JOIN users u ON u.id = b.user_id "
+                        + "WHERE b.status = '4' "
+                        + "AND EXISTS ("
+                        + "  SELECT 1 "
+                        + "  FROM booking_time_slot bts "
+                        + "  JOIN time_slots ts ON ts.id = bts.time_slot_id "
+                        + "  WHERE bts.booking_id = b.id "
+                        + "  AND ts.`date` >= ?"
+                        + ") "
+                        + "ORDER BY b.cancellation_requested_at, b.id",
+                r -> new WaitingCancellation(
+                        map(r),
+                        r.getString("requester_name"),
+                        r.getString("requester_identity"),
+                        r.getTimestamp("cancellation_requested_at").toLocalDateTime()),
+                java.sql.Date.valueOf(today));
+
+        List<QueueItem> queue = new ArrayList<>();
+
+        for (WaitingCancellation row : waiting) {
+            List<TimeSlot> slots = SlotDao.findByBooking(c, row.booking().id());
+            if (slots.isEmpty()) {
+                continue;
+            }
+            TimeSlot first = slots.get(0);
+            queue.add(new QueueItem(
+                    row.booking(),
+                    row.requesterName(),
+                    row.requesterIdentity(),
+                    facilities.get(first.facilityId()),
+                    first.date(),
+                    slots,
+                    row.requestedAt(),
+                    true));
+        }
+        return queue;
+    }
 }

@@ -9,7 +9,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><c:out value="${title} - ${msg.ui_app_name}"/></title>
   <link rel="preload" href="${pageContext.request.contextPath}/static/fonts/ibm-plex-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="${pageContext.request.contextPath}/static/fonts/material-symbols-outlined.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="${pageContext.request.contextPath}/static/fonts/material-symbols-outlined-v2.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/app.css?v=${applicationScope.assetVersion}">
 </head>
 <body>

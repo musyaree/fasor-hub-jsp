@@ -226,6 +226,15 @@
   // Selection State Management
   // ========================================
 
+  function setSelectButton(btn, on) {
+    var label = btn.getAttribute(on ? 'data-label-selected' : 'data-label');
+    if (label) {
+      btn.textContent = label;
+    }
+    btn.classList.toggle('btn--primary', on);
+    btn.classList.toggle('btn--secondary', !on);
+  }
+
   function initSelection() {
     // Handle row/card selection with aria-pressed buttons
     document.querySelectorAll('[data-select-target]').forEach(function(btn) {
@@ -238,6 +247,7 @@
         if (group) {
           document.querySelectorAll('[data-select-group="' + group + '"]').forEach(function(otherBtn) {
             otherBtn.setAttribute('aria-pressed', 'false');
+            setSelectButton(otherBtn, false);
             var otherId = otherBtn.getAttribute('data-select-target');
             var otherTarget = document.getElementById(otherId);
             if (otherTarget) {
@@ -253,6 +263,7 @@
 
         // Select this one
         btn.setAttribute('aria-pressed', 'true');
+        setSelectButton(btn, true);
         if (target) {
           target.classList.add('table__row--selected', 'card-list__item--selected');
         }
@@ -372,7 +383,7 @@
 
       // Update count display
       if (selectedCountEl) {
-        selectedCountEl.textContent = count + ' of 4 selected';
+        selectedCountEl.textContent = (selectedCountEl.getAttribute('data-template') || '%d').replace('%d', count);
       }
 
       // Enable/disable submit button

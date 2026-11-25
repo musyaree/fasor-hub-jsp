@@ -12,7 +12,7 @@
     <div class="calendar__nav">
       <c:choose>
         <c:when test="${grid.hasPrevious}">
-          <a href="${baseUrl}?facility=${facilityId}&amp;month=${grid.prevParam}" class="calendar__nav-btn" aria-label="Previous month">
+          <a href="${baseUrl}?facility=${facilityId}&amp;month=${grid.prevParam}" class="calendar__nav-btn" aria-label="${msg.ui_prev_month}">
             <span class="material-symbols-outlined">chevron_left</span>
           </a>
         </c:when>
@@ -23,7 +23,7 @@
         </c:otherwise>
       </c:choose>
       <c:if test="${grid.hasNext}">
-        <a href="${baseUrl}?facility=${facilityId}&amp;month=${grid.nextParam}" class="calendar__nav-btn" aria-label="Next month">
+        <a href="${baseUrl}?facility=${facilityId}&amp;month=${grid.nextParam}" class="calendar__nav-btn" aria-label="${msg.ui_next_month}">
           <span class="material-symbols-outlined">chevron_right</span>
         </a>
       </c:if>
@@ -31,13 +31,13 @@
   </div>
 
   <div class="calendar__grid">
-    <div class="calendar__day-header">Mon</div>
-    <div class="calendar__day-header">Tue</div>
-    <div class="calendar__day-header">Wed</div>
-    <div class="calendar__day-header">Thu</div>
-    <div class="calendar__day-header">Fri</div>
-    <div class="calendar__day-header">Sat</div>
-    <div class="calendar__day-header">Sun</div>
+    <div class="calendar__day-header">${msg.ui_day_mon}</div>
+    <div class="calendar__day-header">${msg.ui_day_tue}</div>
+    <div class="calendar__day-header">${msg.ui_day_wed}</div>
+    <div class="calendar__day-header">${msg.ui_day_thu}</div>
+    <div class="calendar__day-header">${msg.ui_day_fri}</div>
+    <div class="calendar__day-header">${msg.ui_day_sat}</div>
+    <div class="calendar__day-header">${msg.ui_day_sun}</div>
 
     <c:forEach var="cell" items="${grid.cells}">
       <c:choose>
@@ -70,23 +70,23 @@
   <div class="calendar__legend">
     <div class="calendar__legend-item">
       <span class="calendar__legend-color calendar__legend-color--available"></span>
-      <span>Available</span>
+      <span>${msg.ui_legend_available}</span>
     </div>
     <div class="calendar__legend-item">
       <span class="calendar__legend-color calendar__legend-color--partial"></span>
-      <span>Partial</span>
+      <span>${msg.ui_legend_partial}</span>
     </div>
     <div class="calendar__legend-item">
       <span class="calendar__legend-color calendar__legend-color--full"></span>
-      <span>Full</span>
+      <span>${msg.ui_legend_full}</span>
     </div>
     <div class="calendar__legend-item">
       <span class="calendar__legend-color calendar__legend-color--closed"></span>
-      <span>Closed</span>
+      <span>${msg.ui_legend_closed}</span>
     </div>
     <div class="calendar__legend-item">
       <span class="calendar__legend-color calendar__legend-color--past"></span>
-      <span>Past / No session</span>
+      <span>${msg.ui_legend_past}</span>
     </div>
   </div>
 </div>

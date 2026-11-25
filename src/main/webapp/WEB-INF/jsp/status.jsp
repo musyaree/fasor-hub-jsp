@@ -40,6 +40,7 @@
                     <td class="text-right">
                       <button type="button" class="btn <c:out value="${isSelected ? 'btn--primary' : 'btn--secondary'}"/>"
                               data-select-target="row-${item.id}" data-select-group="bookings"
+                              data-label="${msg.ui_select}" data-label-selected="${msg.ui_selected}"
                               aria-pressed="${isSelected}">${isSelected ? msg.ui_selected : msg.ui_select}</button>
                     </td>
                   </tr>
@@ -61,6 +62,7 @@
                 <div class="card-list__actions">
                   <button type="button" class="btn btn--secondary"
                           data-select-target="card-${item.id}" data-select-group="bookings-mobile"
+                          data-label="${msg.ui_select}" data-label-selected="${msg.ui_selected}"
                           aria-pressed="${isSelected}">${msg.ui_select}</button>
                 </div>
               </div>
@@ -83,7 +85,7 @@
               <div class="detail__item detail__item--wide detail__item--text"><dt>${msg.ui_purpose}</dt><dd><c:out value="${item.purpose}"/></dd></div>
               <div class="detail__item"><dt>${msg.ui_submitted}</dt><dd><c:out value="${item.submittedLabel}"/></dd></div>
               <div class="detail__item"><dt>${msg.ui_status}</dt><dd><t:badge status="${item.status}"/></dd></div>
-              <c:if test="${item.status.code == '3' and not empty item.rejectionReason}">
+              <c:if test="${item.status.css == 'rejected' and not empty item.rejectionReason}">
                 <div class="detail__item detail__item--wide detail__item--text">
                   <dt>${msg.ui_rejection_reason}</dt>
                   <dd class="detail__rejection"><c:out value="${item.rejectionReason}"/></dd>
