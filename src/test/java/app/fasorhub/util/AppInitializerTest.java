@@ -33,4 +33,26 @@ class AppInitializerTest {
 
         assertTrue(rounds.get() >= 3, "rounds after the failure: " + rounds.get());
     }
+
+    @Test
+    void failedOverdueJobStillGeneratesSessions() {
+        AtomicInteger generated = new AtomicInteger();
+
+        AppInitializer.runRound(() -> {
+            throw new IllegalStateException("simulated failure");
+        }, generated::incrementAndGet);
+
+        assertTrue(generated.get() == 1, "generation runs after a failed overdue job");
+    }
+
+    @Test
+    void failedGenerationDoesNotEscapeTheRound() {
+        AtomicInteger overdue = new AtomicInteger();
+
+        AppInitializer.runRound(overdue::incrementAndGet, () -> {
+            throw new IllegalStateException("simulated failure");
+        });
+
+        assertTrue(overdue.get() == 1, "the overdue job ran and the round ended normally");
+    }
 }

@@ -9,8 +9,6 @@ import app.fasorhub.util.Tx;
 
 // Adding editing and deleting facilities with the same validation for add and edit
 public final class FacilityService {
-    // A new facility gets this many days of sessions starting today
-    public static final int HORIZON_DAYS = 35;
     public static final int MAX_NAME = 50;
     public static final int MAX_DESCRIPTION = 200;
 
@@ -33,7 +31,7 @@ public final class FacilityService {
             }
 
             long id = FacilityDao.insert(c, input.name(), input.typeId(), input.description());
-            ScheduleService.generateSlots(c, id, Clock.today(), HORIZON_DAYS);
+            ScheduleService.generateSlots(c, id, Clock.today(), ScheduleService.SLOT_DAYS);
 
             return new Created(id, null);
         });
