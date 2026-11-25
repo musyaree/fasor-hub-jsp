@@ -27,7 +27,7 @@ public class VerificationServlet extends BaseServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Long id = paramLong(req, "bookingId");
         if (id == null) {
-            redirect(req, resp, "/verification");
+            redirect(req, resp, verificationUrl(req, null));
             return;
         }
 
@@ -42,13 +42,13 @@ public class VerificationServlet extends BaseServlet {
         try {
             BookingService.approve(id);
             flashSuccess(req, msg("p12"));
-            redirect(req, resp, "/verification");
+            redirect(req, resp, verificationUrl(req, null));
         } catch (SlotUnavailableException e) {
             flashWarning(req, msg(e.getMessageKey()));
-            redirect(req, resp, "/verification?booking=" + id);
+            redirect(req, resp, verificationUrl(req, id));
         } catch (BookingStatusChangedException e) {
             flashWarning(req, msg(e.getMessageKey()));
-            redirect(req, resp, "/verification");
+            redirect(req, resp, verificationUrl(req, null));
         }
     }
 
@@ -67,25 +67,58 @@ public class VerificationServlet extends BaseServlet {
         try {
             BookingService.reject(id, reason);
             flashError(req, msg("p13"));
-            redirect(req, resp, "/verification");
+            redirect(req, resp, verificationUrl(req, null));
         } catch (BookingStatusChangedException e) {
             flashWarning(req, msg(e.getMessageKey()));
-            redirect(req, resp, "/verification");
+            redirect(req, resp, verificationUrl(req, null));
         }
     }
 
-    private void show(HttpServletRequest req, HttpServletResponse resp, Long selectedId, String reason, boolean rejectOpen, String reasonError)
-            throws ServletException, IOException {
-        List<QueueItem> queue = Tx.run(c -> BookingDao.findQueue(c, Clock.today()));
+    private void show(HttpServletRequest req, HttpServletResponse resp, Long selectedId, String reason, boolean rejectOpen, String reasonError) throws ServletException, IOException {
+        // The selected facility is kept as a GET parameter.
+        Long facilityId = paramLong(req, "facility");
+        BookingDao.BookingFilter filter =
+                new BookingDao.BookingFilter(null, facilityId, null, null);
+        List<QueueItem> queue = Tx.run(c ->
+                BookingDao.findQueue(c, Clock.today(), filter));
+        QueueItem selected = queue.stream()
+                .filter(item -> selectedId != null && item.getId() == selectedId)
+                .findFirst()
+                .orElse(null);
+        req.setAttribute("facilities",
+                Tx.run(app.fasorhub.dao.FacilityDao::findAll));
+        req.setAttribute("facilityFilter", facilityId);
+        req.setAttribute("filterActive", facilityId != null);
 
-        QueueItem selected = queue.stream().filter(item -> selectedId != null && item.getId() == selectedId).findFirst().orElse(null);
-
+        // Distinguishes an empty queue from a queue empty only by filter.
+        req.setAttribute("noFilteredResults", queue.isEmpty());
         req.setAttribute("queue", queue);
         req.setAttribute("selected", selected);
         req.setAttribute("rejectOpen", rejectOpen && selected != null);
         req.setAttribute("reasonError", reasonError);
-        req.setAttribute("reason", reason != null ? reason : param(req, "reason"));
-
+        req.setAttribute("reason",
+                reason != null ? reason : param(req, "reason"));
         render(req, resp, "manage-verification.jsp");
+    }
+    // Preserves the active facility filter after a decision.
+    private String verificationUrl(HttpServletRequest req, Long bookingId) {
+        Long facilityId = paramLong(req, "facility");
+        StringBuilder url = new StringBuilder("/verification");
+
+        if (facilityId != null || bookingId != null) {
+            url.append('?');
+
+            if (facilityId != null) {
+                url.append("facility=").append(facilityId);
+            }
+            
+            if (bookingId != null) {
+                if (facilityId != null) {
+                    url.append('&');
+                }
+                url.append("booking=").append(bookingId);
+            }
+        }
+        return url.toString();
     }
 }

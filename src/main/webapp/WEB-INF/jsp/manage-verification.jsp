@@ -4,14 +4,40 @@
 <t:layout title="${msg.ui_nav_verification}" subtitle="${msg.ui_verification_subtitle}" currentPage="verification">
   <c:set var="base" value="${pageContext.request.contextPath}/verification"/>
 
-  <c:choose>
-    <c:when test="${empty queue}">
-      <section class="card">
-        <h2 class="card__title card__title--divided">${msg.ui_queue}</h2>
-        <t:empty message="${msg.p28}" icon="fact_check"/>
-      </section>
-    </c:when>
-    <c:otherwise>
+<form method="get" action="${base}" class="filter-form">
+  <div class="form-group">
+    <label class="form-label" for="facility">${msg.ui_facility}</label>
+    <select id="facility" name="facility" class="form-input">
+      <option value="">${msg.ui_all_facilities}</option>
+
+      <c:forEach var="facility" items="${facilities}">
+        <option value="${facility.id}"
+          <c:if test="${facilityFilter == facility.id}">selected</c:if>>
+          <c:out value="${facility.name}"/>
+        </option>
+      </c:forEach>
+    </select>
+  </div>
+
+  <button type="submit" class="btn btn--primary">${msg.ui_apply}</button>
+  <a href="${base}" class="btn btn--secondary">${msg.ui_reset}</a>
+</form>
+<c:choose>
+  <c:when test="${empty queue and not filterActive}">
+    <section class="card">
+      <h2 class="card__title card__title--divided">${msg.ui_queue}</h2>
+      <t:empty message="${msg.p28}" icon="fact_check"/>
+    </section>
+  </c:when>
+
+  <c:when test="${empty queue and filterActive}">
+    <section class="card">
+      <h2 class="card__title card__title--divided">${msg.ui_queue}</h2>
+      <t:empty message="${msg.p33}" icon="filter_alt_off"/>
+    </section>
+  </c:when>
+
+  <c:otherwise>
       <div data-async-region>
       <section class="card">
         <h2 class="card__title">${msg.ui_queue}</h2>
@@ -83,6 +109,7 @@
             <form method="post" action="${base}/approve">
               <input type="hidden" name="_csrf" value="${sessionScope._csrf}">
               <input type="hidden" name="bookingId" value="${selected.id}">
+              <input type="hidden" name="facility" value="<c:out value='${facilityFilter}'/>">
               <button type="submit" class="btn btn--primary" <c:if test="${not selected.allAvailable}">disabled</c:if>>${msg.ui_approve}</button>
             </form>
           </div>
@@ -93,7 +120,7 @@
             <form method="post" action="${base}/reject">
               <input type="hidden" name="_csrf" value="${sessionScope._csrf}">
               <input type="hidden" name="bookingId" value="${selected.id}">
-
+              <input type="hidden" name="facility" value="<c:out value='${facilityFilter}'/>">
               <div class="dialog__header">
                 <h2 id="reject-title" class="dialog__title">${msg.ui_rejection_reason}</h2>
                 <button type="button" class="dialog__close" data-dialog-close aria-label="${msg.ui_close}">

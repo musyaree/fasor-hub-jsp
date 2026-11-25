@@ -174,4 +174,152 @@ public final class BookingDao {
                 "UPDATE bookings SET status = '4', previous_status = ?, cancellation_reason = ?, cancellation_requested_at = NOW() WHERE id = ?",
                 previousStatus.code(), reason, id);
     }
+    public record BookingFilter(BookingStatus status, Long facilityId, LocalDate startDate, LocalDate endDate) {
+        // Returns true when at least one filter is active.
+        public boolean isActive() {
+            return status != null || facilityId != null || startDate != null || endDate != null;
+        }
+    }
+
+    // Builds optional bound conditions for booking history filters.
+    public static List<UpcomingBooking> findHistory(
+            Connection c,
+            Long userId,
+            BookingFilter filter
+    ) throws SQLException {
+        StringBuilder sql = new StringBuilder(
+                "SELECT b.*, b.created_at AS submitted_at FROM bookings b WHERE 1 = 1 "
+        );
+        List<Object> params = new ArrayList<>();
+
+        if (userId != null) {
+            sql.append("AND b.user_id = ? ");
+            params.add(userId);
+        }
+
+        if (filter.status() != null) {
+            sql.append("AND b.status = ? ");
+            params.add(filter.status().code());
+        }
+
+        if (filter.facilityId() != null) {
+            sql.append("AND EXISTS (SELECT 1 FROM booking_time_slot bts "
+                    + "JOIN time_slots ts ON ts.id = bts.time_slot_id "
+                    + "WHERE bts.booking_id = b.id AND ts.facility_id = ?) ");
+            params.add(filter.facilityId());
+        }
+
+        if (filter.startDate() != null || filter.endDate() != null) {
+            sql.append("AND EXISTS (SELECT 1 FROM booking_time_slot bts "
+                    + "JOIN time_slots ts ON ts.id = bts.time_slot_id "
+                    + "WHERE bts.booking_id = b.id");
+
+            if (filter.startDate() != null) {
+                sql.append(" AND ts.`date` >= ?");
+                params.add(java.sql.Date.valueOf(filter.startDate()));
+            }
+
+            if (filter.endDate() != null) {
+                sql.append(" AND ts.`date` <= ?");
+                params.add(java.sql.Date.valueOf(filter.endDate()));
+            }
+
+            sql.append(") ");
+        }
+
+        sql.append("ORDER BY b.created_at DESC, b.id DESC");
+
+        // Parameterized values prevent SQL injection.
+        return Jdbc.query(
+                c,
+                sql.toString(),
+                r -> new UpcomingBooking(
+                        map(r),
+                        r.getTimestamp("submitted_at").toLocalDateTime()
+                ),
+                params.toArray()
+        );
+    }
+
+    // Filters only the verification queue while keeping the existing queue rules.
+    public static List<QueueItem> findQueue(Connection c, LocalDate today, BookingFilter filter) throws SQLException {
+        if (filter.facilityId() == null) {
+            return findQueue(c, today);
+        }
+        Map<Long, Facility> facilities = FacilityDao.findAll(c).stream()
+                .collect(Collectors.toMap(Facility::id, Function.identity()));
+        String sql = "SELECT b.*, u.name AS requester_name, u.identity AS requester_identity "
+                + "FROM bookings b "
+                + "JOIN users u ON u.id = b.user_id "
+                + "WHERE b.status = '1' "
+                + "AND NOT " + HAS_PAST_SLOT + " "
+                + "AND EXISTS (SELECT 1 FROM booking_time_slot bts "
+                + "JOIN time_slots ts ON ts.id = bts.time_slot_id "
+                + "WHERE bts.booking_id = b.id AND ts.facility_id = ?) "
+                + "ORDER BY b.created_at, b.id";
+        List<Waiting> waiting = Jdbc.query(
+                c,
+                sql,
+                r -> new Waiting(
+                        map(r),
+                        r.getString("requester_name"),
+                        r.getString("requester_identity"),
+                        r.getTimestamp("created_at").toLocalDateTime()
+                ),
+                java.sql.Date.valueOf(today),
+                filter.facilityId()
+        );
+        List<QueueItem> queue = new ArrayList<>();
+        for (Waiting row : waiting) {
+            List<TimeSlot> slots = SlotDao.findByBooking(c, row.booking().id());
+            if (slots.isEmpty()) {
+                continue;
+            }
+            TimeSlot first = slots.get(0);
+            queue.add(new QueueItem(
+                    row.booking(),
+                    row.requesterName(),
+                    row.requesterIdentity(),
+                    facilities.get(first.facilityId()),
+                    first.date(),
+                    slots,
+                    row.createdAt(),
+                    slots.stream().allMatch(s -> s.isAvailable(today))
+            ));
+        }
+        return queue;
+    }
+    public static boolean invalidDateRange(BookingFilter filter) {
+        return filter.startDate() != null && filter.endDate() != null && filter.startDate().isAfter(filter.endDate());
+    }
+    // Loads pending-cancellation bookings with an optional facility filter.
+    public static List<UpcomingBooking> findPendingCancellationQueue(
+            Connection c,
+            LocalDate today,
+            Long facilityId
+    ) throws SQLException {
+        StringBuilder sql = new StringBuilder(
+                "SELECT b.*, b.created_at AS submitted_at FROM bookings b "
+                        + "WHERE b.status = '4' "
+                        + "AND NOT " + HAS_PAST_SLOT
+        );
+        List<Object> params = new ArrayList<>();
+        params.add(java.sql.Date.valueOf(today));
+        if (facilityId != null) {
+            sql.append(" AND EXISTS (SELECT 1 FROM booking_time_slot bts "
+                    + "JOIN time_slots ts ON ts.id = bts.time_slot_id "
+                    + "WHERE bts.booking_id = b.id AND ts.facility_id = ?)");
+            params.add(facilityId);
+        }
+        sql.append(" ORDER BY b.cancellation_requested_at, b.id");
+        return Jdbc.query(
+                c,
+                sql.toString(),
+                r -> new UpcomingBooking(
+                        map(r),
+                        r.getTimestamp("cancellation_requested_at").toLocalDateTime()
+                ),
+                params.toArray()
+        );
+    }
 }
