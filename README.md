@@ -63,7 +63,7 @@ Switch back to the borrower account to see the decision in **Booking Status**. A
 | Open and close sessions | Available |
 | Facility and facility type management | Available |
 | Automatic handling of overdue bookings | Available |
-| Session generation for new days on existing facilities | Planned |
+| Automatic session generation for every facility, 35 days ahead | Available |
 | Booking history | Planned |
 | Usage reports and list filters | Planned |
 
