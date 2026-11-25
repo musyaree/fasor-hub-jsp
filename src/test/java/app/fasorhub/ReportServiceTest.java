@@ -26,7 +26,7 @@ class ReportServiceTest {
     }
 
     @Test
-    void reportsSeededBookingsAndCountsStatuses() {
+    void reportsSeededBookingsAndCountsStatuses() throws Exception {
         // The seeder creates an approved Tennis booking five days from today.
         LocalDate date = Clock.today().plusDays(5);
 
@@ -48,7 +48,7 @@ class ReportServiceTest {
     }
 
     @Test
-    void excludesPendingCancellationFromUsageButIncludesItsStatusCount() {
+    void excludesPendingCancellationFromUsageButIncludesItsStatusCount() throws Exception {
         // The seeder creates a pending cancellation six days from today.
         LocalDate date = Clock.today().plusDays(6);
 
@@ -61,7 +61,7 @@ class ReportServiceTest {
     }
 
     @Test
-    void closedSessionsAreExcludedFromUsageDenominator() {
+    void closedSessionsAreExcludedFromUsageDenominator() throws Exception {
         // The seeder creates an approved four-session Basketball booking nine days from today.
         LocalDate date = Clock.today().plusDays(9);
         Facility basketball = ReportService.facilities().stream()
