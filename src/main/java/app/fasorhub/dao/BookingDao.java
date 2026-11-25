@@ -361,9 +361,10 @@ public final class BookingDao {
                 row.getLong("booking_count"),
                 row.getLong("occupied_sessions"),
                 row.getLong("bookable_sessions")), params.toArray());
+    }
     private record WaitingCancellation(Booking booking, String requesterName, String requesterIdentity, LocalDateTime requestedAt) {
     }
-
+    
     public static List<QueueItem> findCancellationQueue(Connection c, LocalDate today) throws SQLException {
         return findCancellationQueue(c, today, null);
     }

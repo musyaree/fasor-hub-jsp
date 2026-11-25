@@ -9,8 +9,32 @@
 
   <c:set var="base"
          value="${pageContext.request.contextPath}/cancellation-requests"/>
-
+  <section class="card">
+    <form method="get" action="${base}">
+      <label class="form-label" for="facility">Facility</label>
+      <select class="form-select" id="facility" name="facility" onchange="this.form.submit()">
+        <option value="">All facilities</option>
+        <c:forEach var="option" items="${facilities}">
+          <option value="${option.id}"
+                  <c:if test="${facilityFilter == option.id}">selected</c:if>>
+            <c:out value="${option.name}"/>
+          </option>
+        </c:forEach>
+      </select>
+      <button class="btn btn--secondary" type="submit">Apply</button>
+      <a class="btn btn--secondary" href="${base}">Reset</a>
+    </form>
+  </section>
   <c:choose>
+
+    <c:when test="${filterEmpty}">
+      <section class="card">
+        <h2 class="card__title card__title--divided">
+          ${msg.ui_nav_cancellation_requests}
+        </h2>
+        <t:empty message="${msg.p33}" icon="search"/>
+      </section>
+    </c:when>
 
     <%-- P29: Show an empty state when no cancellation is waiting. --%>
     <c:when test="${empty queue}">
@@ -77,7 +101,7 @@
                       <a data-async-link
                          class="btn
                          <c:out value="${isSelected ? 'btn--primary' : 'btn--secondary'}"/>"
-                         href="${base}?booking=${item.id}">
+                         href="${base}?booking=${item.id}<c:if test='${not empty facilityFilter}'>&amp;facility=${facilityFilter}</c:if>">
                         ${isSelected ? msg.ui_selected : msg.ui_select}
                       </a>
                     </td>
@@ -112,7 +136,7 @@
                 <div class="card-list__actions">
                   <a data-async-link
                      class="btn btn--secondary"
-                     href="${base}?booking=${item.id}">
+                     href="${base}?booking=${item.id}<c:if test='${not empty facilityFilter}'>&amp;facility=${facilityFilter}</c:if>">
                     ${msg.ui_select}
                   </a>
                 </div>
@@ -206,14 +230,9 @@
 
             <div class="actions">
               <form method="post" action="${base}/confirm">
-                <input type="hidden"
-                       name="_csrf"
-                       value="${sessionScope._csrf}">
-
-                <input type="hidden"
-                       name="bookingId"
-                       value="${selected.id}">
-
+                <input type="hidden" name="_csrf" value="${sessionScope._csrf}">
+                <input type="hidden" name="bookingId" value="${selected.id}">
+                <input type="hidden" name="facility" value="${facilityFilter}">
                 <button type="submit" class="btn btn--primary">
                   ${msg.ui_confirm_cancellation}
                 </button>

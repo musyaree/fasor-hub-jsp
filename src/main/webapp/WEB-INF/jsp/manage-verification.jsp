@@ -3,8 +3,29 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <t:layout title="${msg.ui_nav_verification}" subtitle="${msg.ui_verification_subtitle}" currentPage="verification">
   <c:set var="base" value="${pageContext.request.contextPath}/verification"/>
-
+    <section class="card">
+    <form method="get" action="${base}">
+      <label class="form-label" for="facility">Facility</label>
+      <select class="form-select" id="facility" name="facility" onchange="this.form.submit()">
+        <option value="">All facilities</option>
+        <c:forEach var="option" items="${facilities}">
+          <option value="${option.id}"
+                  <c:if test="${facilityFilter == option.id}">selected</c:if>>
+            <c:out value="${option.name}"/>
+          </option>
+        </c:forEach>
+      </select>
+      <button class="btn btn--secondary" type="submit">Apply</button>
+      <a class="btn btn--secondary" href="${base}">Reset</a>
+    </form>
+  </section>
   <c:choose>
+      <c:when test="${filterEmpty}">
+      <section class="card">
+        <h2 class="card__title card__title--divided">${msg.ui_queue}</h2>
+        <t:empty message="${msg.p33}" icon="search"/>
+      </section>
+    </c:when>
     <c:when test="${empty queue}">
       <section class="card">
         <h2 class="card__title card__title--divided">${msg.ui_queue}</h2>
@@ -35,7 +56,13 @@
                   <td class="table__strong"><c:out value="${item.requesterName}"/> (<c:out value="${item.requesterIdentity}"/>)</td>
                   <td><c:out value="${item.facilityName}"/></td>
                   <td><c:out value="${item.dateLabel}"/></td>
-                  <td class="text-right"><a data-async-link class="btn <c:out value="${isSelected ? 'btn--primary' : 'btn--secondary'}"/>" href="${base}?booking=${item.id}">${isSelected ? msg.ui_selected : msg.ui_select}</a></td>
+                  <td class="text-right">
+                  <a data-async-link
+                    class="btn <c:out value="${isSelected ? 'btn--primary' : 'btn--secondary'}"/>"
+                    href="${base}?booking=${item.id}<c:if test='${not empty facilityFilter}'>&amp;facility=${facilityFilter}</c:if>">
+                    ${isSelected ? msg.ui_selected : msg.ui_select}
+                  </a>
+                  </td>
                 </tr>
               </c:forEach>
             </tbody>
@@ -50,7 +77,7 @@
                 <span class="card-list__meta"><c:out value="${item.submittedLabel}"/></span>
               </div>
               <div class="card-list__meta"><c:out value="${item.facilityName}"/>, <c:out value="${item.dateLabel}"/></div>
-              <div class="card-list__actions"><a data-async-link class="btn btn--secondary" href="${base}?booking=${item.id}">${msg.ui_select}</a></div>
+              <div class="card-list__actions"><a data-async-link class="btn btn--secondary" href="${base}?booking=${item.id}<c:if test='${not empty facilityFilter}'>&amp;facility=${facilityFilter}</c:if>">${msg.ui_select}</a></div>
             </div>
           </c:forEach>
         </div>
@@ -83,6 +110,7 @@
             <form method="post" action="${base}/approve">
               <input type="hidden" name="_csrf" value="${sessionScope._csrf}">
               <input type="hidden" name="bookingId" value="${selected.id}">
+              <input type="hidden" name="facility" value="${facilityFilter}">
               <button type="submit" class="btn btn--primary" <c:if test="${not selected.allAvailable}">disabled</c:if>>${msg.ui_approve}</button>
             </form>
           </div>
@@ -93,7 +121,7 @@
             <form method="post" action="${base}/reject">
               <input type="hidden" name="_csrf" value="${sessionScope._csrf}">
               <input type="hidden" name="bookingId" value="${selected.id}">
-
+              <input type="hidden" name="facility" value="${facilityFilter}">
               <div class="dialog__header">
                 <h2 id="reject-title" class="dialog__title">${msg.ui_rejection_reason}</h2>
                 <button type="button" class="dialog__close" data-dialog-close aria-label="${msg.ui_close}">
