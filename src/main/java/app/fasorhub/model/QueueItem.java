@@ -13,6 +13,10 @@ public record QueueItem(Booking booking, String requesterName, String requesterI
     private static final DateTimeFormatter SUBMITTED = DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm", Locale.ENGLISH);
     private static final DateTimeFormatter DAY = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
 
+    public Booking getBooking() {
+        return booking;
+    }
+
     public long getId() {
         return booking.id();
     }

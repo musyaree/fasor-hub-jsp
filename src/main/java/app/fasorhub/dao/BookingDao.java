@@ -271,6 +271,25 @@ public final class BookingDao {
             String facilityName,
             LocalDate bookingDate,
             long sessionCount) {
+        public Booking getBooking() {
+            return booking;
+        }
+
+        public String getRequesterName() {
+            return requesterName;
+        }
+
+        public String getFacilityName() {
+            return facilityName;
+        }
+
+        public LocalDate getBookingDate() {
+            return bookingDate;
+        }
+
+        public long getSessionCount() {
+            return sessionCount;
+        }
     }
 
     // Facility utilization only counts sessions from approved bookings.
@@ -280,6 +299,30 @@ public final class BookingDao {
             long bookingCount,
             long occupiedSessions,
             long bookableSessions) {
+
+        public long getFacilityId() {
+            return facilityId;
+        }
+
+        public String getFacilityName() {
+            return facilityName;
+        }
+
+        public long getBookingCount() {
+            return bookingCount;
+        }
+
+        public long getOccupiedSessions() {
+            return occupiedSessions;
+        }
+
+        public long getBookableSessions() {
+            return bookableSessions;
+        }
+
+        public int getUsagePercent() {
+            return usagePercent();
+        }
 
         public int usagePercent() {
             if (bookableSessions == 0) {

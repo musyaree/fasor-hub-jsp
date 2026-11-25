@@ -17,12 +17,30 @@ public final class ReportService {
     }
 
     public record StatusCount(BookingStatus status, long count) {
+        public BookingStatus getStatus() {
+            return status;
+        }
+
+        public long getCount() {
+            return count;
+        }
     }
 
     public record Report(
             List<BookingDao.ReportBooking> details,
             List<StatusCount> statusCounts,
             List<BookingDao.FacilityUsage> facilityUsage) {
+        public List<BookingDao.ReportBooking> getDetails() {
+            return details;
+        }
+
+        public List<StatusCount> getStatusCounts() {
+            return statusCounts;
+        }
+
+        public List<BookingDao.FacilityUsage> getFacilityUsage() {
+            return facilityUsage;
+        }
     }
 
     public static List<Facility> facilities() {

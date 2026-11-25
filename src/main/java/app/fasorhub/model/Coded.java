@@ -4,6 +4,11 @@ package app.fasorhub.model;
 public interface Coded {
     String code();
 
+    // Lets JSP expressions read the code as a property
+    default String getCode() {
+        return code();
+    }
+
     static <E extends Enum<E> & Coded> E fromCode(Class<E> type, String code) {
         for (E value : type.getEnumConstants()) {
             if (value.code().equals(code)) {
