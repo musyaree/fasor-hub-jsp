@@ -12,6 +12,7 @@ import app.fasorhub.model.Facility;
 import app.fasorhub.model.SlotStatus;
 import app.fasorhub.model.StatusItem;
 import app.fasorhub.model.TimeSlot;
+import app.fasorhub.model.QueueItem;
 import app.fasorhub.util.Clock;
 import app.fasorhub.util.Messages;
 import app.fasorhub.util.Tx;
@@ -231,7 +232,28 @@ public final class BookingService {
     }
 
     public static void confirmCancellation(long bookingId) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+        Tx.runVoid(c -> {
+            // Lock the booking before checking or changing its status.
+            Booking booking = BookingDao.lockById(c, bookingId)
+                    .orElseThrow(() -> new BookingStatusChangedException("p32"));
+
+            // An already processed cancellation must not release slots twice.
+            if (booking.status() != BookingStatus.PENDING_CANCELLATION) {
+                throw new BookingStatusChangedException("p32");
+            }
+
+            // Set status to Cancelled, then release sessions if this was approved.
+            BookingDao.setStatus(c, booking.id(), BookingStatus.CANCELLED);
+            releaseIfApproved(c, booking);
+
+            return null;
+        });
+    }
+
+    public static List<QueueItem> pendingCancellations() {
+        LocalDate today = Clock.today();
+
+        return Tx.run(c -> BookingDao.findCancellationQueue(c, today));
     }
 
     // Runs every overdue booking through expireOverdue and returns how many were changed
