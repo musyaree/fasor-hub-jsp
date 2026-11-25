@@ -64,8 +64,8 @@ Switch back to the borrower account to see the decision in **Booking Status**. A
 | Facility and facility type management | Available |
 | Automatic handling of overdue bookings | Available |
 | Automatic session generation for every facility, 35 days ahead | Available |
-| Booking history | Planned |
-| Usage reports and list filters | Planned |
+| Booking history | Available |
+| Usage reports and list filters | Available |
 
 ## How a booking works
 
