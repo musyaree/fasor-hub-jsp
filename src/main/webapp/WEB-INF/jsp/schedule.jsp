@@ -28,7 +28,7 @@
             <%-- Facility selector --%>
             <div class="form-group">
               <label for="facility-select" class="form-label">${msg.ui_facility}</label>
-              <select id="facility-select" class="form-select" onchange="window.location.href='${base}?facility='+this.value+'&amp;month=${grid.param}'">
+              <select id="facility-select" class="form-input form-select" onchange="window.location.href='${base}?facility='+this.value+'&amp;month=${grid.param}'">
                 <c:forEach var="f" items="${facilities}">
                   <option value="${f.id}" <c:if test="${f.id == selectedFacility.id}">selected</c:if>><c:out value="${f.name}"/></option>
                 </c:forEach>
@@ -99,7 +99,7 @@
                     </div>
                     <div class="summary__item">
                       <dt>${msg.ui_sessions}</dt>
-                      <dd data-selected-count>0 of 4 selected</dd>
+                      <dd data-selected-count data-template="<c:out value="${msg.ui_sessions_selected}"/>"><c:out value="${msg.ui_sessions_selected.replace('%d', '0')}"/></dd>
                     </div>
                   </dl>
                 </c:when>
@@ -121,25 +121,25 @@
               <div class="form-group">
                 <label for="unit" class="form-label">${msg.ui_unit}</label>
                 <input type="text" id="unit" name="unit" class="form-input" maxlength="50" required
-                       placeholder="e.g. Informatics Student Association">
+                       placeholder="${msg.ui_ph_unit}">
               </div>
 
               <div class="form-group">
                 <label for="participants" class="form-label">${msg.ui_participants}</label>
                 <input type="number" id="participants" name="participants" class="form-input" min="1" max="999" required
-                       placeholder="e.g. 12">
+                       placeholder="${msg.ui_ph_participants}">
               </div>
 
               <div class="form-group">
                 <label for="contact" class="form-label">${msg.ui_contact}</label>
                 <input type="text" id="contact" name="contact" class="form-input" maxlength="20" required
-                       value="<c:out value="${sessionScope.user.phone}"/>" placeholder="e.g. 0812-3456-7890">
+                       value="<c:out value="${sessionScope.user.phone}"/>" placeholder="${msg.ui_ph_contact}">
               </div>
 
               <div class="form-group">
                 <label for="purpose" class="form-label">${msg.ui_purpose}</label>
                 <textarea id="purpose" name="purpose" class="form-input form-textarea" maxlength="200" required
-                          placeholder="e.g. Regular futsal practice" rows="3"></textarea>
+                          placeholder="${msg.ui_ph_purpose}" rows="3"></textarea>
               </div>
             </div>
 

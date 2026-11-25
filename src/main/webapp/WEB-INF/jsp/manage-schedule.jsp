@@ -59,7 +59,7 @@
 
               <select
                   id="facility-select"
-                  class="form-select"
+                  class="form-input form-select"
                   onchange="window.location.href='${base}?facility='+this.value+'&amp;month=${grid.param}'">
                 <c:forEach var="facility" items="${facilities}">
                   <option

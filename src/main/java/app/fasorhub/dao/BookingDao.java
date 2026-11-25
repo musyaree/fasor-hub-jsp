@@ -272,5 +272,53 @@ public final class BookingDao {
                 row.getLong("booking_count"),
                 row.getLong("occupied_sessions"),
                 row.getLong("bookable_sessions")), params.toArray());
+    private record WaitingCancellation(Booking booking, String requesterName, String requesterIdentity, LocalDateTime requestedAt) {
+    }
+
+    public static List<QueueItem> findCancellationQueue(Connection c, LocalDate today) throws SQLException {
+        Map<Long, Facility> facilities = FacilityDao.findAll(c).stream()
+                .collect(Collectors.toMap(Facility::id, Function.identity()));
+
+        // Query only PendingCancellation bookings that have at least one future session.
+        List<WaitingCancellation> waiting = Jdbc.query(
+                c,
+                "SELECT b.*, u.name AS requester_name, u.identity AS requester_identity "
+                        + "FROM bookings b "
+                        + "JOIN users u ON u.id = b.user_id "
+                        + "WHERE b.status = '4' "
+                        + "AND EXISTS ("
+                        + "  SELECT 1 "
+                        + "  FROM booking_time_slot bts "
+                        + "  JOIN time_slots ts ON ts.id = bts.time_slot_id "
+                        + "  WHERE bts.booking_id = b.id "
+                        + "  AND ts.`date` >= ?"
+                        + ") "
+                        + "ORDER BY b.cancellation_requested_at, b.id",
+                r -> new WaitingCancellation(
+                        map(r),
+                        r.getString("requester_name"),
+                        r.getString("requester_identity"),
+                        r.getTimestamp("cancellation_requested_at").toLocalDateTime()),
+                java.sql.Date.valueOf(today));
+
+        List<QueueItem> queue = new ArrayList<>();
+
+        for (WaitingCancellation row : waiting) {
+            List<TimeSlot> slots = SlotDao.findByBooking(c, row.booking().id());
+            if (slots.isEmpty()) {
+                continue;
+            }
+            TimeSlot first = slots.get(0);
+            queue.add(new QueueItem(
+                    row.booking(),
+                    row.requesterName(),
+                    row.requesterIdentity(),
+                    facilities.get(first.facilityId()),
+                    first.date(),
+                    slots,
+                    row.requestedAt(),
+                    true));
+        }
+        return queue;
     }
 }
