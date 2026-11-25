@@ -4,73 +4,69 @@
 
 <t:layout
         title="${msg.ui_nav_reports}"
+        subtitle="${msg.ui_report_subtitle}"
         currentPage="reports">
 
   <c:set var="base" value="${pageContext.request.contextPath}/reports"/>
 
   <section class="card">
-    <h2 class="card__title">${msg.ui_nav_reports}</h2>
+    <h2 class="card__title card__title--divided">${msg.ui_report_filters}</h2>
 
-    <form method="get" action="${base}" class="form">
+    <form method="get" action="${base}" class="report-filters">
       <input type="hidden" name="run" value="true">
 
-      <div class="form__group">
-        <label for="startDate">Tanggal awal</label>
-        <input id="startDate"
-               name="startDate"
-               type="date"
+      <div class="form-group">
+        <label for="startDate" class="form-label">${msg.ui_start_date}</label>
+        <input id="startDate" name="startDate" type="date" class="form-input"
                value="<c:out value='${startDate}'/>">
       </div>
 
-      <div class="form__group">
-        <label for="endDate">Tanggal akhir</label>
-        <input id="endDate"
-               name="endDate"
-               type="date"
+      <div class="form-group">
+        <label for="endDate" class="form-label">${msg.ui_end_date}</label>
+        <input id="endDate" name="endDate" type="date" class="form-input"
                value="<c:out value='${endDate}'/>">
       </div>
 
-      <div class="form__group">
-        <label for="facility">Fasilitas</label>
-        <select id="facility" name="facility">
-          <option value=""
-                  <c:if test="${empty selectedFacilityId}">selected</c:if>>
-            Semua Fasilitas
-          </option>
+      <div class="form-group">
+        <label for="facility" class="form-label">${msg.ui_facility}</label>
+        <select id="facility" name="facility" class="form-input form-select">
+          <option value="" <c:if test="${empty selectedFacilityId}">selected</c:if>>${msg.ui_all_facilities}</option>
           <c:forEach var="facility" items="${facilities}">
-            <option value="${facility.id}"
-                    <c:if test="${selectedFacilityId == facility.id}">selected</c:if>>
-              <c:out value="${facility.name}"/>
-            </option>
+            <option value="${facility.id}" <c:if test="${selectedFacilityId == facility.id}">selected</c:if>><c:out value="${facility.name}"/></option>
           </c:forEach>
         </select>
       </div>
 
-      <button type="submit" class="btn btn--primary">Tampilkan Laporan</button>
+      <div class="form-group report-filters__submit">
+        <button type="submit" class="btn btn--primary">${msg.ui_show_report}</button>
+      </div>
     </form>
 
     <c:if test="${not empty reportMessage}">
-      <p role="alert"><c:out value="${reportMessage}"/></p>
+      <p class="notice notice--warning" role="alert">
+        <span class="material-symbols-outlined" aria-hidden="true">warning</span>
+        <c:out value="${reportMessage}"/>
+      </p>
     </c:if>
   </section>
 
   <c:if test="${not empty report}">
     <section class="card">
-      <h2 class="card__title">Ringkasan Pengajuan per Status</h2>
+      <h2 class="card__title">${msg.ui_report_status_summary}</h2>
 
       <div class="table-wrap">
         <table class="table">
           <thead>
             <tr>
-              <th>Status</th>
-              <th>Jumlah Pengajuan</th>
+              <th>${msg.ui_status}</th>
+              <th class="text-right">${msg.ui_report_count}</th>
             </tr>
           </thead>
           <tbody>
             <c:forEach var="item" items="${report.statusCounts}">
               <tr>
-                <td><c:out value="${item.status.label}"/></td>
-                <td><c:out value="${item.count}"/></td>
+                <td><t:badge status="${item.status}"/></td>
+                <td class="text-right table__strong"><c:out value="${item.count}"/></td>
               </tr>
             </c:forEach>
           </tbody>
@@ -79,56 +75,56 @@
     </section>
 
     <section class="card">
-      <h2 class="card__title">Penggunaan Fasilitas</h2>
+      <h2 class="card__title">${msg.ui_report_usage}</h2>
 
       <div class="table-wrap">
         <table class="table">
           <thead>
             <tr>
-              <th>Fasilitas</th>
-              <th>Peminjaman Disetujui</th>
-              <th>Sesi Terisi</th>
-              <th>Penggunaan</th>
+              <th>${msg.ui_facility}</th>
+              <th class="text-right">${msg.ui_report_approved_bookings}</th>
+              <th class="text-right">${msg.ui_report_occupied}</th>
+              <th class="text-right">${msg.ui_report_usage_pct}</th>
             </tr>
           </thead>
           <tbody>
             <c:forEach var="item" items="${report.facilityUsage}">
               <tr>
-                <td><c:out value="${item.facilityName}"/></td>
-                <td><c:out value="${item.bookingCount}"/></td>
-                <td><c:out value="${item.occupiedSessions}"/></td>
-                <td><c:out value="${item.usagePercent}"/>%</td>
+                <td class="table__strong"><c:out value="${item.facilityName}"/></td>
+                <td class="text-right"><c:out value="${item.bookingCount}"/></td>
+                <td class="text-right"><c:out value="${item.occupiedSessions}"/></td>
+                <td class="text-right"><c:out value="${item.usagePercent}"/>%</td>
               </tr>
             </c:forEach>
           </tbody>
         </table>
       </div>
-      <p>Penggunaan = sesi terisi dibagi sesi yang dapat dipinjam; sesi Ditutup tidak dihitung.</p>
+      <p class="form-hint">${msg.ui_report_usage_note}</p>
     </section>
 
     <section class="card">
-      <h2 class="card__title">Rincian Pengajuan</h2>
+      <h2 class="card__title">${msg.ui_report_details}</h2>
 
       <div class="table-wrap">
         <table class="table">
           <thead>
             <tr>
-              <th>Peminjam</th>
-              <th>Fasilitas</th>
-              <th>Tanggal</th>
-              <th>Status</th>
-              <th>Jumlah Sesi</th>
-              <th>Keperluan</th>
+              <th>${msg.ui_requester}</th>
+              <th>${msg.ui_facility}</th>
+              <th>${msg.ui_date}</th>
+              <th>${msg.ui_status}</th>
+              <th class="text-right">${msg.ui_report_sessions_count}</th>
+              <th>${msg.ui_purpose}</th>
             </tr>
           </thead>
           <tbody>
             <c:forEach var="item" items="${report.details}">
               <tr>
-                <td><c:out value="${item.requesterName}"/></td>
+                <td class="table__strong table__nowrap"><c:out value="${item.requesterName}"/></td>
                 <td><c:out value="${item.facilityName}"/></td>
-                <td><c:out value="${item.bookingDate}"/></td>
-                <td><c:out value="${item.booking.status.label}"/></td>
-                <td><c:out value="${item.sessionCount}"/></td>
+                <td class="table__nowrap"><c:out value="${item.bookingDate}"/></td>
+                <td><t:badge status="${item.booking.status}"/></td>
+                <td class="text-right"><c:out value="${item.sessionCount}"/></td>
                 <td><c:out value="${item.booking.purpose}"/></td>
               </tr>
             </c:forEach>

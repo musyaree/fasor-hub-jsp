@@ -2,43 +2,51 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <t:layout title="${msg.ui_nav_history}" currentPage="history">
-    <section class="card">
-    <form method="get" action="${pageContext.request.contextPath}/history">
-      <label class="form-label" for="status">Status</label>
-      <select class="form-select" id="status" name="status">
-        <option value="">All statuses</option>
-        <c:forEach var="option" items="${statuses}">
-          <option value="${option.code}"
-                  <c:if test="${statusFilter == option.code}">selected</c:if>>
-            <c:out value="${option.label}"/>
-          </option>
-        </c:forEach>
-      </select>
-
-      <c:if test="${sessionScope.user.role.manager}">
-        <label class="form-label" for="facility">Facility</label>
-        <select class="form-select" id="facility" name="facility">
-          <option value="">All facilities</option>
-          <c:forEach var="option" items="${facilities}">
-            <option value="${option.id}"
-                    <c:if test="${facilityFilter == option.id}">selected</c:if>>
-              <c:out value="${option.name}"/>
+  <section class="card filter-card">
+    <form method="get" action="${pageContext.request.contextPath}/history" class="filter-bar">
+      <div class="form-group">
+        <label class="form-label" for="status">${msg.ui_status}</label>
+        <select class="form-input form-select" id="status" name="status">
+          <option value="">${msg.ui_all_statuses}</option>
+          <c:forEach var="option" items="${statuses}">
+            <option value="${option.code}"
+                    <c:if test="${statusFilter == option.code}">selected</c:if>>
+              <c:out value="${option.label}"/>
             </option>
           </c:forEach>
         </select>
+      </div>
+
+      <c:if test="${sessionScope.user.role.manager}">
+        <div class="form-group">
+          <label class="form-label" for="facility">${msg.ui_facility}</label>
+          <select class="form-input form-select" id="facility" name="facility">
+            <option value="">${msg.ui_all_facilities}</option>
+            <c:forEach var="option" items="${facilities}">
+              <option value="${option.id}"
+                      <c:if test="${facilityFilter == option.id}">selected</c:if>>
+                <c:out value="${option.name}"/>
+              </option>
+            </c:forEach>
+          </select>
+        </div>
       </c:if>
 
-      <label class="form-label" for="startDate">Start date</label>
-      <input class="form-input" type="date" id="startDate" name="startDate"
-             value="<c:out value='${startDateFilter}'/>">
+      <div class="form-group">
+        <label class="form-label" for="startDate">${msg.ui_start_date}</label>
+        <input class="form-input" type="date" id="startDate" name="startDate"
+               value="<c:out value='${startDateFilter}'/>">
+      </div>
 
-      <label class="form-label" for="endDate">End date</label>
-      <input class="form-input" type="date" id="endDate" name="endDate"
-             value="<c:out value='${endDateFilter}'/>">
+      <div class="form-group">
+        <label class="form-label" for="endDate">${msg.ui_end_date}</label>
+        <input class="form-input" type="date" id="endDate" name="endDate"
+               value="<c:out value='${endDateFilter}'/>">
+      </div>
 
-      <div class="actions">
-        <button class="btn btn--primary" type="submit">Apply</button>
-        <a class="btn btn--secondary" href="${pageContext.request.contextPath}/history">Reset</a>
+      <div class="filter-bar__actions">
+        <button class="btn btn--primary" type="submit">${msg.ui_apply}</button>
+        <a class="btn btn--secondary" href="${pageContext.request.contextPath}/history">${msg.ui_reset}</a>
       </div>
     </form>
   </section>
@@ -72,7 +80,7 @@
     </c:when>
 
     <c:otherwise>
-      <div class="status-layout">
+      <div class="status-layout<c:if test="${sessionScope.user.role.manager}"> status-layout--stacked</c:if>">
         <section class="card">
           <h2 class="card__title">${msg.ui_nav_history}</h2>
           <div class="table-wrap">

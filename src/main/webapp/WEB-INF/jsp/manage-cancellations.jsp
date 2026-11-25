@@ -9,11 +9,12 @@
 
   <c:set var="base"
          value="${pageContext.request.contextPath}/cancellation-requests"/>
-  <section class="card">
-    <form method="get" action="${base}">
-      <label class="form-label" for="facility">Facility</label>
-      <select class="form-select" id="facility" name="facility" onchange="this.form.submit()">
-        <option value="">All facilities</option>
+  <section class="card filter-card">
+    <form method="get" action="${base}" class="filter-bar">
+      <div class="form-group">
+      <label class="form-label" for="facility">${msg.ui_facility}</label>
+      <select class="form-input form-select" id="facility" name="facility" onchange="this.form.submit()">
+        <option value="">${msg.ui_all_facilities}</option>
         <c:forEach var="option" items="${facilities}">
           <option value="${option.id}"
                   <c:if test="${facilityFilter == option.id}">selected</c:if>>
@@ -21,8 +22,11 @@
           </option>
         </c:forEach>
       </select>
-      <button class="btn btn--secondary" type="submit">Apply</button>
-      <a class="btn btn--secondary" href="${base}">Reset</a>
+      </div>
+      <div class="filter-bar__actions">
+        <button class="btn btn--primary" type="submit">${msg.ui_apply}</button>
+        <a class="btn btn--secondary" href="${base}">${msg.ui_reset}</a>
+      </div>
     </form>
   </section>
   <c:choose>
