@@ -1,6 +1,8 @@
 package app.fasorhub.service;
 
+import app.fasorhub.dao.FacilityDao;
 import app.fasorhub.dao.SlotDao;
+import app.fasorhub.model.Facility;
 import app.fasorhub.model.Cell;
 import app.fasorhub.model.DateStatus;
 import app.fasorhub.model.MonthGrid;
@@ -35,22 +37,54 @@ public final class ScheduleService {
             new LocalTime[] {LocalTime.of(13, 0), LocalTime.of(15, 0)},
             new LocalTime[] {LocalTime.of(15, 0), LocalTime.of(17, 0)});
 
-    /** Number of days slots are generated ahead */
+    /** Number of days of sessions every facility keeps, counting today */
     public static final int SLOT_DAYS = 35;
 
     private ScheduleService() {
     }
 
     /**
-     * Creates the four daily sessions of one facility for a number of days.
+     * Creates the four daily sessions of one facility for a number of days and returns how many were new.
      * Skips sessions that already exist so running twice is harmless.
      */
-    public static void generateSlots(Connection c, long facilityId, LocalDate from, int days) throws SQLException {
+    public static int generateSlots(Connection c, long facilityId, LocalDate from, int days) throws SQLException {
+        int created = 0;
+
+        // Only missing sessions are inserted: inserting rows that already exist would lock the end of the index
+        // and make overlapping runs wait for each other
+        java.util.Set<String> existing = SlotDao.existingKeys(c, facilityId, from, from.plusDays(days - 1L));
+
         for (int day = 0; day < days; day++) {
             for (LocalTime[] session : SESSIONS) {
-                SlotDao.insertIfAbsent(c, facilityId, from.plusDays(day), session[0], session[1], SlotStatus.AVAILABLE);
+                LocalDate date = from.plusDays(day);
+
+                if (!existing.contains(date + "T" + session[0])) {
+                    created += SlotDao.insertIfAbsent(c, facilityId, date, session[0], session[1], SlotStatus.AVAILABLE);
+                }
             }
         }
+
+        return created;
+    }
+
+    /**
+     * Keeps every facility stocked with sessions from today through the next days of the horizon.
+     * Existing sessions are never touched, whatever their status. Returns how many sessions were added.
+     */
+    public static int generateForAllFacilities() {
+        LocalDate today = Clock.today();
+        List<Facility> facilities = Tx.run(FacilityDao::findAll);
+        int created = 0;
+
+        // One facility per transaction so a failure never rolls back the others. The facility row is locked first,
+        // the same order as deleting a facility, so two overlapping runs take turns instead of deadlocking.
+        for (Facility facility : facilities) {
+            created += Tx.run(c -> FacilityDao.lockById(c, facility.id()).isEmpty()
+                    ? 0
+                    : generateSlots(c, facility.id(), today, SLOT_DAYS));
+        }
+
+        return created;
     }
     /**
      * Builds a monthly calendar grid for a facility.

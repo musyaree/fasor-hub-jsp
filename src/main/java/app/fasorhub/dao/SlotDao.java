@@ -61,6 +61,12 @@ public final class SlotDao {
         Jdbc.update(c, "UPDATE time_slots SET status = ? WHERE id IN (" + Jdbc.marks(ids.size()) + ")", params);
     }
 
+    // The date and start time of every session a facility already has in a range, as date plus T plus time
+    public static java.util.Set<String> existingKeys(Connection c, long facilityId, LocalDate from, LocalDate to) throws SQLException {
+        return new java.util.HashSet<>(Jdbc.query(c, "SELECT `date`, start_time FROM time_slots WHERE facility_id = ? AND `date` BETWEEN ? AND ?",
+                r -> r.getDate(1).toLocalDate() + "T" + r.getTime(2).toLocalTime(), facilityId, java.sql.Date.valueOf(from), java.sql.Date.valueOf(to)));
+    }
+
     // Adds a slot only when it does not exist yet so running twice is harmless
     public static int insertIfAbsent(Connection c, long facilityId, LocalDate date, java.time.LocalTime start, java.time.LocalTime end, SlotStatus status)
             throws SQLException {
