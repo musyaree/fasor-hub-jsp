@@ -51,6 +51,11 @@
     <span class="material-symbols-outlined">bar_chart</span>
     ${msg.ui_nav_reports}
   </a>
+  <a href="${pageContext.request.contextPath}/history"
+   class="mobile-nav__link"<c:if test="${currentPage == 'history'}"> aria-current="page"</c:if>>
+  <span class="material-symbols-outlined">history</span>
+  ${msg.ui_nav_history}
+  </a>
     <div class="mobile-nav__divider"></div>
     <div class="mobile-nav__user">
       <span class="mobile-nav__username"><c:out value="${sessionScope.user.name}"/></span>
@@ -89,6 +94,11 @@
       <a href="${pageContext.request.contextPath}/reports" class="sidebar__link"<c:if test="${currentPage == 'reports'}"> aria-current="page"</c:if>>
         <span class="material-symbols-outlined sidebar__icon">bar_chart</span>
         ${msg.ui_nav_reports}
+      </a>
+      <a href="${pageContext.request.contextPath}/history"
+        class="sidebar__link"<c:if test="${currentPage == 'history'}"> aria-current="page"</c:if>>
+        <span class="material-symbols-outlined sidebar__icon">history</span>
+        ${msg.ui_nav_history}
       </a>
       </nav>
       <div class="sidebar__user">

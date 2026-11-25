@@ -166,6 +166,34 @@ public final class BookingDao {
     }
 
     /**
+     * Finds every booking for a user, including bookings with past dates, newest first.
+     */
+    public static List<HistoryBooking> findHistoryByUser(Connection c, long userId) throws SQLException {
+        return findHistory(c, "WHERE b.user_id = ?", userId);
+    }
+
+    /**
+     * Finds every booking, including bookings with past dates, newest first.
+     */
+    public static List<HistoryBooking> findAllHistory(Connection c) throws SQLException {
+        return findHistory(c, "", new Object[0]);
+    }
+
+    private static List<HistoryBooking> findHistory(Connection c, String where, Object... params) throws SQLException {
+        return Jdbc.query(c,
+                "SELECT b.*, u.name AS requester_name, u.identity AS requester_identity "
+                        + "FROM bookings b JOIN users u ON u.id = b.user_id "
+                        + where + " ORDER BY b.created_at DESC, b.id DESC",
+                r -> new HistoryBooking(map(r), r.getString("requester_name"), r.getString("requester_identity"),
+                        r.getTimestamp("created_at").toLocalDateTime()),
+                params);
+    }
+
+    public record HistoryBooking(Booking booking, String requesterName, String requesterIdentity,
+                                LocalDateTime createdAt) {
+    }
+
+    /**
      * Transitions a booking to PENDING_CANCELLATION status.
      * Saves the previous status and cancellation reason.
      */
