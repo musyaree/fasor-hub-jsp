@@ -1,5 +1,7 @@
 package app.fasorhub.service;
 
+import app.fasorhub.model.HistoryItem;
+import app.fasorhub.model.User;
 import app.fasorhub.dao.BookingDao;
 import app.fasorhub.dao.FacilityDao;
 import app.fasorhub.dao.SlotDao;
@@ -332,5 +334,29 @@ public final class BookingService {
         }
 
         return booking;
+    }
+    /**
+     * Returns booking history for a borrower, or all booking history for a manager.
+     */
+    public static List<HistoryItem> history(User user) {
+        return Tx.run(c -> {
+            Map<Long, Facility> facilities = FacilityDao.findAll(c).stream()
+                    .collect(Collectors.toMap(Facility::id, Function.identity()));
+            List<BookingDao.HistoryBooking> rows = user.role().isManager()
+                    ? BookingDao.findAllHistory(c)
+                    : BookingDao.findHistoryByUser(c, user.id());
+            List<HistoryItem> items = new ArrayList<>();
+            for (BookingDao.HistoryBooking row : rows) {
+                List<TimeSlot> slots = SlotDao.findByBooking(c, row.booking().id());
+                if (slots.isEmpty()) {
+                    continue;
+                }
+                TimeSlot first = slots.get(0);
+                Facility facility = facilities.get(first.facilityId());
+                items.add(new HistoryItem(row.booking(), row.requesterName(), row.requesterIdentity(),
+                        facility, first.date(), slots, row.createdAt()));
+            }
+            return items;
+        });
     }
 }
