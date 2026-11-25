@@ -627,7 +627,7 @@ button, input, select, textarea {
   white-space: nowrap;
 }
 
-.badge__icon {
+.badge .badge__icon {
   font-size: 16px;
   width: 16px;
   height: 16px;
@@ -1230,7 +1230,7 @@ textarea.form-input {
 
 .calendar__grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
 .calendar__day-header {
@@ -1272,7 +1272,7 @@ textarea.form-input {
   margin-top: var(--space-1);
 }
 
-.calendar__status-icon {
+.calendar__status .calendar__status-icon {
   font-size: 14px;
 }
 
@@ -1899,6 +1899,12 @@ textarea.form-input {
   }
 }
 
+.schedule-layout > .card,
+.status-layout > .card,
+.cancel-layout > .card {
+  margin-top: 0;
+}
+
 .schedule__step {
   display: flex;
   flex-direction: column;
@@ -2199,4 +2205,21 @@ label.slot-item:hover {
 
 .btn--danger:hover {
   background: color-mix(in srgb, var(--color-status-occupied) 90%, black);
+}
+
+/* Link-styled buttons keep the button look */
+a.btn {
+  text-decoration: none;
+}
+
+/* On narrow screens the status icon alone fits the calendar cell */
+@media (max-width: 599px) {
+  .calendar__status .calendar__status-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
 }
