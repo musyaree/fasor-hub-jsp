@@ -1,5 +1,6 @@
 package app.fasorhub.util;
 import app.fasorhub.service.BookingService;
+import app.fasorhub.service.ScheduleService;
 
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
@@ -51,8 +52,14 @@ public class AppInitializer implements ServletContextListener {
         Db.close();
     }
 
+    // One round: overdue bookings first, then sessions, so a failing job never blocks the other
     static void runJobs() {
-        runJobs(BookingService::expireAllOverdue);
+        runRound(BookingService::expireAllOverdue, ScheduleService::generateForAllFacilities);
+    }
+
+    static void runRound(IntSupplier overdue, IntSupplier generation) {
+        runJobs(overdue);
+        runGeneration(generation);
     }
 
     // A failed round is logged and the next hour tries again
@@ -63,6 +70,16 @@ public class AppInitializer implements ServletContextListener {
             LOG.info("Overdue bookings handled: " + handled);
         } catch (RuntimeException e) {
             LOG.log(Level.WARNING, "Scheduled job failed", e);
+        }
+    }
+
+    static void runGeneration(IntSupplier work) {
+        try {
+            int created = work.getAsInt();
+
+            LOG.info("Sessions created: " + created);
+        } catch (RuntimeException e) {
+            LOG.log(Level.WARNING, "Session generation failed", e);
         }
     }
 
