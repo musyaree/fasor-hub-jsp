@@ -1,5 +1,7 @@
 package app.fasorhub.web;
 
+import app.fasorhub.dao.FacilityDao;
+import app.fasorhub.model.Facility;
 import app.fasorhub.dao.BookingDao;
 import app.fasorhub.exception.BookingStatusChangedException;
 import app.fasorhub.exception.SlotUnavailableException;
@@ -7,6 +9,8 @@ import app.fasorhub.model.QueueItem;
 import app.fasorhub.service.BookingService;
 import app.fasorhub.util.Clock;
 import app.fasorhub.util.Tx;
+import app.fasorhub.dao.FacilityDao;
+import app.fasorhub.model.Facility;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;

@@ -253,9 +253,12 @@ public final class BookingService {
     }
 
     public static List<QueueItem> pendingCancellations() {
-        LocalDate today = Clock.today();
+        return pendingCancellations(null);
+    }
 
-        return Tx.run(c -> BookingDao.findCancellationQueue(c, today));
+    public static List<QueueItem> pendingCancellations(Long facilityId) {
+        LocalDate today = Clock.today();
+        return Tx.run(c -> BookingDao.findCancellationQueue(c, today, facilityId));
     }
 
     // Runs every overdue booking through expireOverdue and returns how many were changed
@@ -338,13 +341,29 @@ public final class BookingService {
     /**
      * Returns booking history for a borrower, or all booking history for a manager.
      */
-    public static List<HistoryItem> history(User user) {
+public static List<HistoryItem> history(User user) {
+    return loadHistory(user, null, null, null, null);
+}
+
+public static List<HistoryItem> history(
+        User user, BookingStatus status, Long facilityId,
+        LocalDate startDate, LocalDate endDate) throws ValidationException {
+    if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+        throw new ValidationException("p19");
+    }
+
+    return loadHistory(user, status, facilityId, startDate, endDate);
+}
+
+    private static List<HistoryItem> loadHistory(
+            User user, BookingStatus status, Long facilityId,
+            LocalDate startDate, LocalDate endDate) {
         return Tx.run(c -> {
             Map<Long, Facility> facilities = FacilityDao.findAll(c).stream()
                     .collect(Collectors.toMap(Facility::id, Function.identity()));
             List<BookingDao.HistoryBooking> rows = user.role().isManager()
-                    ? BookingDao.findAllHistory(c)
-                    : BookingDao.findHistoryByUser(c, user.id());
+                    ? BookingDao.findAllHistory(c, status, facilityId, startDate, endDate)
+                    : BookingDao.findHistoryByUser(c, user.id(), status, null, startDate, endDate);
             List<HistoryItem> items = new ArrayList<>();
             for (BookingDao.HistoryBooking row : rows) {
                 List<TimeSlot> slots = SlotDao.findByBooking(c, row.booking().id());
