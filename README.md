@@ -13,24 +13,59 @@ Fasor Hub is a web application for requesting and managing court sessions at a c
 The system treats a session as a shared resource: two requests can never end up holding the same session, even when managers act at the same moment.
 
 > [!NOTE]
-> Fasor Hub is under active development. The data layer and the approve and reject logic are in place; the web interface is being built. See the [project board](https://github.com/users/musyaree/projects/4) for what is next.
+> Fasor Hub is still being built. Borrowing, verification, cancellation, and schedule and facility management work end to end. Booking history and usage reports are not done yet. See the [project board](https://github.com/users/musyaree/projects/4) for what is next.
+
+## Try it
+
+Live demo: **https://fasor-hub.up.railway.app**
+
+The demo runs on a free plan, so the first request after a quiet period can take a few seconds. Sign in with one of the demo accounts. All of them use the password `password`.
+
+| Email | Role |
+|---|---|
+| `alice@example.com` | Borrower |
+| `manager@example.com` | Manager |
+
+The demo holds sample data only. Please do not enter real personal details.
+
+### As a borrower
+
+Sign in as `alice@example.com`.
+
+1. Open **Schedule & Booking**, pick a facility, and choose a date on the calendar.
+2. Select one to four sessions, fill in the applicant details, and submit. Accept the terms when asked.
+3. Open **Booking Status** and select the booking to see its details and decision.
+4. Open **Cancellation**, select a pending or approved booking, give a reason, and request the cancellation.
+
+### As a manager
+
+Sign in as `manager@example.com`.
+
+1. Open **Verification**, select the request you just submitted, then approve it or reject it with a reason.
+2. Open **Manage Schedule** to open or close sessions for a date.
+3. Open **Manage Facilities** to add, edit, or delete a facility, and to manage facility types.
+4. Open **Cancellation Requests** to confirm a cancellation that a borrower asked for.
+
+Switch back to the borrower account to see the decision in **Booking Status**. A request holds no session until it is approved, and an approved booking releases its sessions when its cancellation is confirmed.
 
 ## Features
 
 | Feature | Status |
 |---|---|
 | Database schema, seed data, and message catalog | Available |
+| Register, log in, and role-based access | Available |
+| Facility calendar and session availability | Available |
+| Request one to four sessions | Available |
+| Booking status | Available |
 | Approve a booking and occupy all of its sessions, or none | Available |
 | Reject a booking with a reason | Available |
-| Register, log in, and role-based access | Planned |
-| Facility calendar and session availability | Planned |
-| Request one to four sessions | Planned |
-| Booking status and history | Planned |
-| Cancellation requests and confirmation | Planned |
-| Open and close sessions | Planned |
-| Automatic handling of overdue bookings and session generation | Planned |
+| Cancellation requests and confirmation | Available |
+| Open and close sessions | Available |
+| Facility and facility type management | Available |
+| Automatic handling of overdue bookings | Available |
+| Session generation for new days on existing facilities | Planned |
+| Booking history | Planned |
 | Usage reports and list filters | Planned |
-| Facility management | Planned |
 
 ## How a booking works
 
@@ -80,8 +115,7 @@ docker run --rm --network host -e SEED_ON_START=true fasor-hub
 
 The schema is created on startup. With `SEED_ON_START=true`, an empty database is filled with demo data: four accounts, four facilities, 35 days of sessions, and 13 sample bookings.
 
-> [!NOTE]
-> There are no web pages yet, so the application starts and prepares the database but has nothing to open in a browser.
+Open `http://localhost:8080` once the container is running.
 
 ### Demo accounts
 
@@ -95,7 +129,7 @@ All demo accounts use the password `password`.
 | `manager@example.com` | Manager |
 
 > [!WARNING]
-> Never seed demo data on a public deployment.
+> Demo data uses a known password. The public demo is seeded on purpose and holds sample data only. For any deployment with real users, leave `SEED_ON_START` unset.
 
 ### Run the tests
 
@@ -119,6 +153,7 @@ Settings come from environment variables. Copy `.env.example` as a starting poin
 | `DB_NAME` | `fasor_hub` | Database name |
 | `DB_USER` | `fasor` | Database user |
 | `DB_PASSWORD` | `fasor` | Database password |
+| `MYSQLHOST`, `MYSQLPORT`, `MYSQLDATABASE`, `MYSQLUSER`, `MYSQLPASSWORD` | unset | Used when the matching `DB_*` value is not set, so hosts such as Railway work without extra setup |
 | `DB_POOL` | `8` | Maximum pooled connections |
 | `SEED_ON_START` | unset | Set to `true` to seed an empty database |
 
@@ -128,13 +163,22 @@ Settings come from environment variables. Copy `.env.example` as a starting poin
 src/main/java/app/fasorhub/
   dao/        SQL access, one class per table
   exception/  Errors that map to user-facing messages
+  filter/     Login, role, and CSRF checks for every request
   model/      Records and coded enums
   service/    Transactions and locking rules
-  util/       Connection pool, transactions, clock, messages, seeder
+  util/       Connection pool, transactions, clock, messages, seeder, startup tasks
+  web/        Thin servlets, one per page
+  web/manage/ Servlets for the manager pages
 src/main/resources/
   schema.sql              Table definitions
   messages_en.properties  All user-facing text
-src/test/java/            Constraint, seed, verification, and concurrency tests
+src/main/webapp/
+  WEB-INF/jsp/   Page templates
+  WEB-INF/tags/  Shared layout, calendar, badge, and empty-state tags
+  static/        CSS, JavaScript, and self-hosted fonts
+src/test/java/   Service, constraint, seed, security, and concurrency tests
+docs/            Use cases, design documents, and the design system
+Dockerfile       Builds the WAR and runs it on Tomcat
 ```
 
 ## Design notes
